@@ -12,6 +12,10 @@ export default defineConfig({
   site: 'https://aristotle.me',
   output: 'static',
   adapter: cloudflare(),
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   integrations: [
     react(),
     markdoc(),
