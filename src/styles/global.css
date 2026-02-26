@@ -63,10 +63,16 @@ body {
   color: var(--color-text-primary-dark);
 }
 
-/* Prose styles for blog content */
+/* Prose styles for blog content — clean editorial feel */
 .prose {
-  max-width: 72ch;
-  line-height: 1.8;
+  max-width: none;
+  font-size: 1.125rem;
+  line-height: 1.85;
+  color: var(--color-text-primary-light);
+}
+
+.dark .prose {
+  color: var(--color-text-primary-dark);
 }
 
 .prose h1,
@@ -75,21 +81,24 @@ body {
 .prose h4 {
   font-family: var(--font-display);
   font-weight: 700;
-  margin-top: 2em;
-  margin-bottom: 0.75em;
-  line-height: 1.3;
-}
-
-.prose h1 {
-  font-size: 2.25rem;
+  margin-top: 2.25em;
+  margin-bottom: 0.6em;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .prose h2 {
-  font-size: 1.75rem;
+  font-size: 1.625rem;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.dark .prose h2 {
+  border-bottom-color: var(--color-border-dark);
 }
 
 .prose h3 {
-  font-size: 1.375rem;
+  font-size: 1.25rem;
 }
 
 .prose p {
@@ -99,17 +108,24 @@ body {
 .prose a {
   color: var(--color-accent);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 .prose a:hover {
   color: var(--color-accent-hover);
+  text-decoration-thickness: 2px;
+}
+
+.prose strong {
+  font-weight: 600;
 }
 
 .prose blockquote {
   border-left: 3px solid var(--color-accent);
   padding-left: 1.25em;
   margin-left: 0;
+  margin-right: 0;
   font-style: italic;
   color: var(--color-text-secondary-light);
 }
@@ -120,22 +136,25 @@ body {
 
 .prose code {
   font-family: var(--font-mono);
-  font-size: 0.875em;
+  font-size: 0.85em;
   background-color: var(--color-card-light);
-  padding: 0.2em 0.4em;
-  border-radius: 0.25rem;
+  padding: 0.2em 0.45em;
+  border-radius: 0.3rem;
+  border: 1px solid var(--color-border-light);
 }
 
 .dark .prose code {
   background-color: var(--color-card-dark);
+  border-color: var(--color-border-dark);
 }
 
 .prose pre {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 1.25em;
   overflow-x: auto;
-  margin-bottom: 1.5em;
+  margin-bottom: 1.75em;
   border: 1px solid var(--color-border-light);
+  font-size: 0.9rem;
 }
 
 .dark .prose pre {
@@ -145,7 +164,8 @@ body {
 .prose pre code {
   background: none;
   padding: 0;
-  font-size: 0.875rem;
+  font-size: inherit;
+  border: none;
 }
 
 .prose ul,
@@ -154,8 +174,25 @@ body {
   padding-left: 1.5em;
 }
 
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
 .prose li {
   margin-bottom: 0.5em;
+  padding-left: 0.25em;
+}
+
+.prose li::marker {
+  color: var(--color-text-secondary-light);
+}
+
+.dark .prose li::marker {
+  color: var(--color-text-secondary-dark);
 }
 
 .prose img {
@@ -165,7 +202,7 @@ body {
 
 .prose hr {
   border-color: var(--color-border-light);
-  margin: 2.5em 0;
+  margin: 3em 0;
 }
 
 .dark .prose hr {
