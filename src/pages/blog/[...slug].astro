@@ -1,0 +1,134 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import TagList from '@components/TagList.astro';
+import { getCollection, render } from 'astro:content';
+import { ArrowLeft, ArrowRight, Calendar, Clock } from '@lucide/astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+  return sorted.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      prevPost: sorted[i + 1] || null,
+      nextPost: sorted[i - 1] || null,
+    },
+  }));
+}
+
+const { post, prevPost, nextPost } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(post);
+
+const formattedDate = post.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date.toISOString(),
+  ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+  author: {
+    '@type': 'Person',
+    name: 'Aristotle Malichetty',
+    url: 'https://aristotle.me',
+  },
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.coverImage}
+  type="article"
+  publishedDate={post.data.date.toISOString()}
+>
+  <article class="py-16 sm:py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <!-- Back link -->
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors mb-8"
+      >
+        <ArrowLeft class="w-4 h-4" />
+        Back to Blog
+      </a>
+
+      <!-- Header -->
+      <header class="mb-10 stagger">
+        <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-4">
+          <span class="inline-flex items-center gap-1">
+            <Calendar class="w-4 h-4" />
+            <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
+          </span>
+          {remarkPluginFrontmatter.readingTime && (
+            <span class="inline-flex items-center gap-1">
+              <Clock class="w-4 h-4" />
+              {remarkPluginFrontmatter.readingTime}
+            </span>
+          )}
+        </div>
+        <h1 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-4">
+          {post.data.title}
+        </h1>
+        <p class="text-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+          {post.data.description}
+        </p>
+        {post.data.tags.length > 0 && <TagList tags={post.data.tags} class="mt-4" />}
+      </header>
+
+      <!-- Cover image -->
+      {post.data.coverImage && (
+        <img
+          src={post.data.coverImage}
+          alt={post.data.title}
+          class="w-full rounded-xl mb-10"
+        />
+      )}
+
+      <!-- Content -->
+      <div class="prose">
+        <Content />
+      </div>
+
+      <!-- Prev/Next -->
+      <nav class="mt-16 pt-10 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] grid sm:grid-cols-2 gap-6">
+        {prevPost ? (
+          <a
+            href={`/blog/${prevPost.id}`}
+            class="group p-4 rounded-lg border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] hover:border-[var(--color-accent)]/50 transition-colors"
+          >
+            <span class="inline-flex items-center gap-1 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
+              <ArrowLeft class="w-3 h-3" /> Previous
+            </span>
+            <p class="font-medium text-sm group-hover:text-[var(--color-accent)] transition-colors">
+              {prevPost.data.title}
+            </p>
+          </a>
+        ) : <div />}
+        {nextPost && (
+          <a
+            href={`/blog/${nextPost.id}`}
+            class="group p-4 rounded-lg border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] hover:border-[var(--color-accent)]/50 transition-colors text-right"
+          >
+            <span class="inline-flex items-center gap-1 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1 justify-end">
+              Next <ArrowRight class="w-3 h-3" />
+            </span>
+            <p class="font-medium text-sm group-hover:text-[var(--color-accent)] transition-colors">
+              {nextPost.data.title}
+            </p>
+          </a>
+        )}
+      </nav>
+    </div>
+  </article>
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</BaseLayout>

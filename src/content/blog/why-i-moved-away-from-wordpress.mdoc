@@ -1,0 +1,61 @@
+---
+title: Why I Moved Away from WordPress (And What I Use Now)
+description: After years of wrestling with plugins, slow load times, and security patches, I finally ditched WordPress. Here's what I replaced it with and why.
+date: 2026-02-20
+tags:
+  - Web Development
+  - Astro
+  - Opinion
+featured: true
+---
+
+For years, WordPress was my default. Need a website? WordPress. Need a blog? WordPress. Client wants a landing page? WordPress with Elementor. It was the safe, familiar choice — and for a while, it worked.
+
+But as I got deeper into modern web development, I started noticing all the things I'd been ignoring.
+
+## The Breaking Point
+
+It wasn't one thing. It was death by a thousand paper cuts:
+
+- **Speed**: A "simple" blog with 5 plugins took 3+ seconds to load. My Lighthouse scores were embarrassing.
+- **Security**: I was spending more time updating plugins and patching vulnerabilities than writing content.
+- **Hosting costs**: Managed WordPress hosting that could actually handle traffic wasn't cheap.
+- **The plugin tax**: Every feature required a plugin. Every plugin required updates. Every update risked breaking something.
+
+The final straw was when a client's site got hacked through an outdated contact form plugin. I'd been meaning to update it for weeks.
+
+## What I Use Now
+
+I moved to **Astro** — a modern static-site generator that ships zero JavaScript by default. Here's why it fits:
+
+### Performance
+Astro generates pure HTML at build time. No runtime JavaScript framework loading in the browser. My pages load in under 500ms.
+
+### Content Management
+I use **Keystatic** for content management. It gives me a clean admin UI at `/keystatic` that edits Markdown files directly in the repo. No database. No server. Version-controlled content.
+
+### Deployment
+Everything deploys to **Cloudflare Pages** for free. Global CDN, automatic SSL, preview deployments on every branch. It just works.
+
+### Developer Experience
+Astro lets me use React, Vue, or Svelte components when I need interactivity — but most of the time, I don't. The `.astro` component format is clean and intuitive.
+
+## The Trade-offs
+
+I won't pretend there aren't downsides:
+
+- **No plugin ecosystem**: You build what you need or find npm packages.
+- **Technical barrier**: You need to be comfortable with code. This isn't for non-technical clients.
+- **Dynamic features**: Things like comments, search, and forms require third-party services or API routes.
+
+For me, these trade-offs are worth it. I'd rather spend 30 minutes building a feature than 30 minutes debugging why a plugin update broke my site.
+
+## Who Should Still Use WordPress?
+
+WordPress is still the right choice for:
+- Non-technical users who need to manage their own site
+- E-commerce stores (WooCommerce is battle-tested)
+- Sites that need dozens of integrations out of the box
+- Teams with existing WordPress expertise
+
+But if you're a developer building a blog, portfolio, or marketing site — give Astro a look. You might not go back.

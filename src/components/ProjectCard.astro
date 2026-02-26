@@ -1,0 +1,62 @@
+---
+import TagList from './TagList.astro';
+import { ExternalLink, Github } from '@lucide/astro';
+
+interface Props {
+  title: string;
+  description: string;
+  url?: string;
+  github?: string;
+  tags?: string[];
+  status?: 'live' | 'building' | 'idea';
+}
+
+const { title, description, url, github, tags = [], status = 'idea' } = Astro.props;
+
+const statusConfig = {
+  live: { label: 'Live', class: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  building: { label: 'Building', class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+  idea: { label: 'Idea', class: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+};
+
+const { label: statusLabel, class: statusClass } = statusConfig[status];
+---
+
+<div class="group p-6 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] hover:border-[var(--color-accent)]/50 hover:-translate-y-1 transition-all duration-300">
+  <div class="flex items-start justify-between mb-3">
+    <span class:list={['inline-block px-2.5 py-1 text-xs font-medium rounded-full', statusClass]}>
+      {statusLabel}
+    </span>
+    <div class="flex items-center gap-2">
+      {url && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Visit ${title}`}
+          class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
+        >
+          <ExternalLink class="w-4 h-4" />
+        </a>
+      )}
+      {github && (
+        <a
+          href={github}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${title} on GitHub`}
+          class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
+        >
+          <Github class="w-4 h-4" />
+        </a>
+      )}
+    </div>
+  </div>
+  <h3 class="font-display text-lg font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors">
+    {title}
+  </h3>
+  <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-4 line-clamp-3">
+    {description}
+  </p>
+  {tags.length > 0 && <TagList tags={tags} />}
+</div>

@@ -1,0 +1,97 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import BlogCard from '@components/BlogCard.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const posts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+---
+
+<BaseLayout
+  title="Blog"
+  description="Thoughts on marketing analytics, building SaaS products, and AI-powered development."
+>
+  <section class="py-16 sm:py-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="mb-12 stagger">
+        <h1 class="font-display text-4xl font-bold mb-4">Blog</h1>
+        <p class="text-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] max-w-2xl">
+          Thoughts on marketing analytics, building SaaS products, and AI-powered development.
+        </p>
+      </div>
+
+      <!-- Tag filters -->
+      {allTags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-10" id="tag-filters">
+          <button
+            data-tag="all"
+            class="tag-btn active px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)] cursor-pointer transition-colors"
+          >
+            All
+          </button>
+          {allTags.map((tag) => (
+            <button
+              data-tag={tag}
+              class="tag-btn px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] cursor-pointer hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger" id="posts-grid">
+        {posts.map((post) => (
+          <div data-tags={JSON.stringify(post.data.tags)}>
+            <BlogCard
+              slug={post.id}
+              title={post.data.title}
+              description={post.data.description}
+              date={post.data.date}
+              tags={post.data.tags}
+            />
+          </div>
+        ))}
+      </div>
+
+      {posts.length === 0 && (
+        <p class="text-center text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-20">
+          No posts yet. Check back soon!
+        </p>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.tag-btn');
+    const posts = document.querySelectorAll<HTMLElement>('#posts-grid > div');
+    if (!buttons.length || !posts.length) return;
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tag;
+
+        buttons.forEach((b) => {
+          b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+          b.classList.add('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+        });
+
+        btn.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+        btn.classList.remove('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+
+        posts.forEach((post) => {
+          if (tag === 'all') {
+            post.style.display = '';
+          } else {
+            const postTags: string[] = JSON.parse(post.dataset.tags || '[]');
+            post.style.display = postTags.includes(tag!) ? '' : 'none';
+          }
+        });
+      });
+    });
+  });
+</script>

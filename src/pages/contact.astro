@@ -1,0 +1,72 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { Mail, Linkedin, Twitter, Github, ArrowUpRight } from '@lucide/astro';
+
+const contacts = [
+  {
+    icon: Mail,
+    label: 'Email',
+    value: 'mailaristotle@gmail.com',
+    href: 'mailto:mailaristotle@gmail.com',
+    description: 'Best way to reach me for work inquiries or collaborations.',
+  },
+  {
+    icon: Linkedin,
+    label: 'LinkedIn',
+    value: 'linkedin.com/in/aristotlem',
+    href: 'https://linkedin.com/in/aristotlem',
+    description: 'Connect with me professionally. I post about analytics and building in public.',
+  },
+  {
+    icon: Twitter,
+    label: 'X / Twitter',
+    value: '@aristotlem',
+    href: 'https://x.com/aristotlem',
+    description: 'Where I share quick thoughts, project updates, and AI experiments.',
+  },
+  {
+    icon: Github,
+    label: 'GitHub',
+    value: 'github.com/aristotlem',
+    href: 'https://github.com/aristotlem',
+    description: 'Open source projects and code experiments.',
+  },
+];
+---
+
+<BaseLayout
+  title="Contact"
+  description="Get in touch — email, LinkedIn, Twitter, or GitHub."
+>
+  <section class="py-16 sm:py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <div class="stagger">
+        <h1 class="font-display text-4xl font-bold mb-4">Contact</h1>
+        <p class="text-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-12">
+          Have a question, project idea, or just want to say hi? Pick your preferred channel.
+        </p>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          {contacts.map(({ icon: Icon, label, value, href, description }) => (
+            <a
+              href={href}
+              target={href.startsWith('mailto') ? undefined : '_blank'}
+              rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+              class="group p-5 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] hover:border-[var(--color-accent)]/50 hover:-translate-y-1 transition-all duration-300"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <Icon class="w-6 h-6 text-[var(--color-accent)]" />
+                <ArrowUpRight class="w-4 h-4 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <h3 class="font-display font-semibold mb-1">{label}</h3>
+              <p class="text-sm text-[var(--color-accent)] mb-2">{value}</p>
+              <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">
+                {description}
+              </p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

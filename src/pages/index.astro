@@ -1,0 +1,135 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import BlogCard from '@components/BlogCard.astro';
+import ProjectCard from '@components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { BarChart3, Rocket, Cpu, ArrowRight } from '@lucide/astro';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const latestPosts = allPosts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const allProjects = await getCollection('projects');
+const featuredProjects = allProjects
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
+
+const pillars = [
+  {
+    icon: BarChart3,
+    title: 'Marketing Analytics',
+    description: 'GA4, Looker Studio, BigQuery — turning raw data into actionable insights and dashboards.',
+  },
+  {
+    icon: Rocket,
+    title: 'SaaS Builder',
+    description: 'Designing and shipping products from idea to launch using modern web frameworks.',
+  },
+  {
+    icon: Cpu,
+    title: 'AI-Powered Development',
+    description: 'Leveraging Claude, Cursor, and automation to build faster and smarter.',
+  },
+];
+---
+
+<BaseLayout
+  title="aristotle.me"
+  description="Aris Malichetty — Marketing Analyst, SaaS Builder, and AI-Powered Developer."
+>
+  <Hero />
+
+  <!-- What I Do -->
+  <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <h2 class="font-display text-2xl font-bold mb-10">What I Do</h2>
+      <div class="grid sm:grid-cols-3 gap-6 stagger">
+        {pillars.map(({ icon: Icon, title, description }) => (
+          <div class="p-6 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+            <Icon class="w-8 h-8 text-[var(--color-accent)] mb-4" />
+            <h3 class="font-display text-lg font-semibold mb-2">{title}</h3>
+            <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">
+              {description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest Posts -->
+  {latestPosts.length > 0 && (
+    <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center justify-between mb-10">
+          <h2 class="font-display text-2xl font-bold">Latest Posts</h2>
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
+          >
+            View all <ArrowRight class="w-4 h-4" />
+          </a>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 stagger">
+          {latestPosts.map((post) => (
+            <BlogCard
+              slug={post.id}
+              title={post.data.title}
+              description={post.data.description}
+              date={post.data.date}
+              tags={post.data.tags}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Featured Projects -->
+  {featuredProjects.length > 0 && (
+    <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center justify-between mb-10">
+          <h2 class="font-display text-2xl font-bold">Projects</h2>
+          <a
+            href="/projects"
+            class="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
+          >
+            View all <ArrowRight class="w-4 h-4" />
+          </a>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-6 stagger">
+          {featuredProjects.map((project) => (
+            <ProjectCard
+              title={project.data.title}
+              description={project.data.description}
+              url={project.data.url}
+              github={project.data.github}
+              tags={project.data.tags}
+              status={project.data.status}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA -->
+  <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="font-display text-3xl font-bold mb-4">Let's build something</h2>
+      <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] max-w-lg mx-auto mb-8">
+        Have an idea, a project, or just want to chat about data and AI? I'd love to hear from you.
+      </p>
+      <a
+        href="/contact"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+      >
+        Get in Touch
+        <ArrowRight class="w-4 h-4" />
+      </a>
+    </div>
+  </section>
+</BaseLayout>

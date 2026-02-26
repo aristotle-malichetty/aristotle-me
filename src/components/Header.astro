@@ -1,0 +1,93 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { Menu, X } from '@lucide/astro';
+
+const navLinks = [
+  { href: '/blog', label: 'Blog' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/resume', label: 'Resume' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-light)]/80 dark:bg-[var(--color-surface-dark)]/80 backdrop-blur-md">
+  <nav class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="font-display text-xl font-bold tracking-tight hover:text-[var(--color-accent)] transition-colors">
+      aristotle<span class="text-[var(--color-accent)]">.</span>me
+    </a>
+
+    <!-- Desktop nav -->
+    <div class="hidden md:flex items-center gap-1">
+      {navLinks.map(({ href, label }) => (
+        <a
+          href={href}
+          class:list={[
+            'px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+            currentPath.startsWith(href)
+              ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/10'
+              : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-text-primary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)]',
+          ]}
+        >
+          {label}
+        </a>
+      ))}
+      <div class="ml-2">
+        <ThemeToggle />
+      </div>
+    </div>
+
+    <!-- Mobile controls -->
+    <div class="flex md:hidden items-center gap-2">
+      <ThemeToggle />
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="Toggle menu"
+        class="flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] cursor-pointer"
+      >
+        <Menu id="menu-open-icon" class="w-[18px] h-[18px]" />
+        <X id="menu-close-icon" class="w-[18px] h-[18px] hidden" />
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-light)] dark:bg-[var(--color-surface-dark)]">
+    <div class="px-4 py-3 space-y-1">
+      {navLinks.map(({ href, label }) => (
+        <a
+          href={href}
+          class:list={[
+            'block px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+            currentPath.startsWith(href)
+              ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/10'
+              : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-text-primary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)]',
+          ]}
+        >
+          {label}
+        </a>
+      ))}
+    </div>
+  </div>
+</header>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    const openIcon = document.getElementById('menu-open-icon');
+    const closeIcon = document.getElementById('menu-close-icon');
+    if (!btn || !menu || !openIcon || !closeIcon) return;
+
+    btn.addEventListener('click', () => {
+      const isOpen = !menu.classList.contains('hidden');
+      menu.classList.toggle('hidden');
+      openIcon.classList.toggle('hidden');
+      closeIcon.classList.toggle('hidden');
+    });
+  });
+</script>
