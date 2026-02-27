@@ -7,6 +7,7 @@ import { getCollection } from 'astro:content';
 
 const allProjects = await getCollection('projects');
 const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
+const allTags = [...new Set(projects.flatMap((p) => p.data.tags))].sort();
 ---
 
 <BaseLayout
@@ -26,8 +27,29 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
         </p>
       </div>
 
-      <div class="grid sm:grid-cols-2 gap-5">
+      <!-- Tag filters -->
+      {allTags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-10" id="tag-filters">
+          <button
+            data-tag="all"
+            class="tag-btn active px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)] cursor-pointer transition-all duration-200"
+          >
+            All
+          </button>
+          {allTags.map((tag) => (
+            <button
+              data-tag={tag}
+              class="tag-btn px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] cursor-pointer hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-all duration-200"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div class="grid sm:grid-cols-2 gap-5" id="projects-grid">
         {projects.map((project) => (
+          <div data-tags={JSON.stringify(project.data.tags)}>
           <ProjectCard
             title={project.data.title}
             description={project.data.description}
@@ -36,6 +58,7 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
             tags={project.data.tags}
             status={project.data.status}
           />
+          </div>
         ))}
       </div>
 
@@ -47,3 +70,34 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.tag-btn');
+    const projects = document.querySelectorAll<HTMLElement>('#projects-grid > div');
+    if (!buttons.length || !projects.length) return;
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tag;
+
+        buttons.forEach((b) => {
+          b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+          b.classList.add('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+        });
+
+        btn.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+        btn.classList.remove('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+
+        projects.forEach((project) => {
+          if (tag === 'all') {
+            project.style.display = '';
+          } else {
+            const projectTags: string[] = JSON.parse(project.dataset.tags || '[]');
+            project.style.display = projectTags.includes(tag!) ? '' : 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
