@@ -21,8 +21,8 @@ const socialLinks = [
         {socialLinks.map(({ href, label, icon: Icon }) => (
           <a
             href={href}
-            target="_blank"
-            rel="noopener noreferrer"
+            target={href.startsWith('mailto') ? undefined : '_blank'}
+            rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
             aria-label={label}
             class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
           >

@@ -6,7 +6,6 @@ import markdoc from '@astrojs/markdoc';
 import sitemap from '@astrojs/sitemap';
 import keystatic from '@keystatic/astro';
 import cloudflare from '@astrojs/cloudflare';
-import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
 
 export default defineConfig({
   site: 'https://aristotle.me',
@@ -36,6 +35,6 @@ export default defineConfig({
         dark: 'github-dark',
       },
     },
-    remarkPlugins: [remarkReadingTime],
+    remarkPlugins: [],
   },
 });

@@ -151,9 +151,21 @@ const { slug, turnstileSiteKey } = Astro.props;
       return `${Math.floor(months / 12)}y ago`;
     }
 
+    // Escape HTML to prevent XSS when inserting into innerHTML
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
+
     // Render a single comment
     function renderComment(comment: any, depth: number): string {
-      const initial = comment.author_name.charAt(0).toUpperCase();
+      const safeName = escapeHtml(comment.author_name);
+      const safeText = escapeHtml(comment.comment_text);
+      const initial = safeName.charAt(0).toUpperCase();
       const canReply = depth < 2;
       const repliesHtml = comment.replies?.length
         ? `<div class="comment-replies">${comment.replies.map((r: any) => renderComment(r, depth + 1)).join('')}</div>`
@@ -165,11 +177,11 @@ const { slug, turnstileSiteKey } = Astro.props;
             <div class="comment-avatar shrink-0">${initial}</div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <span class="font-semibold text-sm">${comment.author_name}</span>
+                <span class="font-semibold text-sm">${safeName}</span>
                 <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">${timeAgo(comment.created_at)}</span>
               </div>
-              <p class="text-sm leading-relaxed mb-2 break-words">${comment.comment_text}</p>
-              ${canReply ? `<button class="reply-btn text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors" data-reply-id="${comment.id}" data-reply-name="${comment.author_name}">Reply</button>` : ''}
+              <p class="text-sm leading-relaxed mb-2 break-words">${safeText}</p>
+              ${canReply ? `<button class="reply-btn text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors" data-reply-id="${comment.id}" data-reply-name="${safeName}">Reply</button>` : ''}
               <div class="inline-reply-slot"></div>
             </div>
           </div>
@@ -198,11 +210,12 @@ const { slug, turnstileSiteKey } = Astro.props;
     function openReplyForm(commentId: string, authorName: string, slot: HTMLElement) {
       closeReplyForm();
 
+      const safeAuthorName = escapeHtml(authorName);
       const replyHtml = `
         <div class="inline-reply-form mt-3 mb-2 pl-0">
           <div class="flex items-center justify-between mb-2">
             <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Replying to <strong>${authorName}</strong>
+              Replying to <strong>${safeAuthorName}</strong>
             </span>
             <button type="button" class="reply-cancel text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors">Cancel</button>
           </div>

@@ -36,17 +36,7 @@ const { title, description, image, type, publishedDate } = Astro.props;
     />
     <ClientRouter />
 
-    <!-- Prevent FOUC for dark mode -->
-    <script is:inline>
-      (function () {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
-    </script>
+    <!-- Prevent FOUC for dark mode (data-astro-rerun ensures it runs on initial load + View Transitions) -->
     <script is:inline data-astro-rerun>
       (function () {
         const theme = localStorage.getItem('theme');

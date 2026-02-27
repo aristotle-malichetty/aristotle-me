@@ -63,7 +63,7 @@ export async function POST(context: APIContext) {
 
     // IP hash for rate limiting
     const clientIP = context.request.headers.get('CF-Connecting-IP') || context.request.headers.get('X-Forwarded-For') || '0.0.0.0';
-    const ipHash = await hashIP(clientIP);
+    const ipHash = await hashIP(clientIP, env.IP_HASH_SALT || 'aristotle_default_salt');
 
     // Spam content filter — silently save as unapproved
     const isSpam = isSpamContent(data.comment_text);
