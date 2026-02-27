@@ -1,0 +1,131 @@
+---
+title: How I Built aristotle.me (And Everything That Went Wrong)
+description: I built my personal site in about 6 hours with Claude Code — while watching UFC fights. Here's every decision, every problem, and every fix.
+date: 2026-02-27
+tags:
+  - Web Development
+  - Astro
+  - Building in Public
+featured: true
+---
+
+I spent the last few days building this site from scratch. Not "from a template" scratch — from `npm create astro@latest` scratch. The whole thing took about 4-6 hours of actual work (and yes, I was watching UFC videos in between). Here's what actually happened.
+
+## How It Started
+
+I wrote about the full decision journey — why WordPress wasn't working, the tools I considered, and how I landed on Astro + Keystatic + Cloudflare — in a [separate post](/blog/why-i-moved-away-from-wordpress). Go read that one first if you want the backstory.
+
+The short version: I use Claude Code every day but never touched my WordPress dashboard. So I decided to rebuild the whole site in a stack I can manage from my terminal.
+
+Once I had the stack figured out, I wrote a full build spec in a Claude chat conversation — site structure, content schemas, design direction, component breakdown, deployment config. Then I handed that spec to Claude Code in plan mode and it scaffolded the entire project. From there, I iterated.
+
+## The Build Spec Approach
+
+I didn't open my editor and start coding. I started in Claude chat (the conversation UI, not Claude Code) and talked through everything — what pages I need, what the content schemas should look like, design direction, deployment config. By the end of that conversation, Claude had given me a full product spec.
+
+Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project — Astro setup, Keystatic config, all pages and components, SEO, Cloudflare deployment. The whole initial site came from that one spec.
+
+From there, I iterated on what was generated. That's where the real work started.
+
+## The Blog Design
+
+I wanted the blog to feel premium. Clean. Like reading something on Substack or Medium — not a developer's default markdown page.
+
+I looked at how Substack handles their blog posts — reading time at the top, comment count, share buttons. I basically copied the layout: time to read, share icons (the share button style is almost straight from Substack), and a table of contents on the side that scrolls with the post and collapses when you click it.
+
+The goal was simple: make it feel like a real publication, not a side project.
+
+## Building the Comment System
+
+I wanted comments. Claude Code gave me three options:
+
+1. **Giscus** — powered by GitHub Discussions. Free, open source.
+2. **Cusdis** — lightweight, open source comment system.
+3. **Build your own** — Cloudflare D1 (SQLite) + Workers. Full control.
+
+I rejected Giscus immediately. Readers would need a GitHub account to comment on my blog post. Most of my visitors aren't developers — that's too much friction.
+
+I tried to check out Cusdis, but the website wouldn't even load for me (probably my ad blocker). Not a great sign for a tool I'd depend on.
+
+I'd been working with Cloudflare D1 on a couple of other projects already, so I had experience with it. And Cloudflare's Turnstile (their free invisible CAPTCHA) handles bot protection really well. So I went with option 3: build my own.
+
+The setup:
+- **Cloudflare D1** for storage
+- **Cloudflare Turnstile** for spam protection
+- Honeypot fields that bots fill out and humans never see
+- Rate limiting: 5 comments per 10 minutes per IP
+- Content-based spam filtering
+- Threaded replies
+
+### The Reply UX Problem
+
+When I first built the reply system, clicking "Reply" on a comment scrolled you back up to the main comment form at the top. It showed "Replying to [name]" but you were now at the top of the page, away from the conversation. Bad UX.
+
+So I rebuilt it. Now when you click "Reply," an inline form appears right below that comment — name field, text field, submit button. You stay in context. You can see the comment you're replying to. Much better.
+
+### The Turnstile Headache
+
+Each comment form needs its own Turnstile widget for bot protection. The main form has one. When someone clicks "Reply," a second Turnstile widget renders inline in the reply form.
+
+Managing two Turnstile instances on the same page — initializing them, resetting them after submission, cleaning them up when the reply form closes — was more annoying than the actual comment storage logic. It works, but it was the most frustrating part of the whole build.
+
+## The XSS I Almost Shipped
+
+This one stung.
+
+The comment system worked great. Threaded replies, real-time loading, everything. Then I looked closer at the reply flow and realized I was inserting user-generated content into `innerHTML` **without escaping it**.
+
+If someone typed `<script>alert('hi')</script>` as their name, it would execute. Classic XSS.
+
+The fix was simple — an `escapeHtml()` function that converts `<`, `>`, `"`, `'`, and `&` to their HTML entities. Applied it everywhere user content touches the DOM. But the lesson was real: it's easy to miss when you're moving fast and the feature "works."
+
+## The UI Was Bland
+
+After building everything, I installed the **Playwright MCP** into my Claude Code workflow so it could actually see and verify the UI. I told it to go through the whole site and tell me what could be improved.
+
+Honestly, the initial design was plain. Functional but bland. Claude Code came back with suggestions — a warmer color palette, better card elevations, the white-and-cement color pattern you see now. It looked significantly better after that pass.
+
+I also pulled two recommendations from my LinkedIn and added them as testimonials. The original reviews were long — nobody reads a full paragraph from a stranger. So I trimmed them down to the strongest two sentences each.
+
+## The Resume Page I Deleted
+
+I built a full resume page. Then I deleted it.
+
+Nowadays every job requires a customized resume. Having a generic one on my website doesn't make sense. And LinkedIn already serves that purpose. So I removed the whole page and built out the About section instead — what I'm working on, who I've worked with, what I do, and the tools I use.
+
+## The Git Hook I Over-Engineered
+
+I was worried about accidentally publishing draft blog posts. So I built a pre-commit hook that scans every staged file for `draft: true` and blocks the commit.
+
+Then I realized: the code already filters out drafts. They never show on the live site regardless. And if I ever use Keystatic from a browser (GitHub storage mode), drafts need to be in the repo for the CMS to see them. The hook would break that.
+
+Removed it two commits later. Lesson: before building a safety net, check if the net already exists.
+
+## The Copywriting Pass
+
+This surprised me. After the whole build was done, I asked Claude Code to review the copywriting across the entire site. Not the code — the words.
+
+My homepage hero said: *"I do marketing, analytics, AI, automation, and product dev — basically anything that lets me avoid a boring day."*
+
+Meanwhile my About page said: *"I see how things should work — then I build them."*
+
+The About page was carrying the whole site while the homepage — the first thing anyone reads — sounded like a LinkedIn headline. I rewrote everything in one pass. Trimmed testimonials, de-duplicated taglines, tightened every description.
+
+Zero functionality changed. More impact than any technical feature I shipped.
+
+## The Numbers
+
+- **4-6 hours** of actual build time
+- **9 commits** from scaffold to current state
+- **~20 files** across components, pages, content, and config
+- **0 plugins** beyond core Astro integrations
+- **Sub-500ms page loads** on a global CDN
+- **$0/month** hosting cost
+
+The site is open source: [github.com/aristotlem/aristotle-me](https://github.com/aristotlem/aristotle-me)
+
+---
+
+Building a personal site isn't hard. Building one you're actually proud of takes more iterations than you'd expect. The code was the easy part. The hard part was knowing what to say, what to cut, and when to stop.
+
+Also, I got to watch some great UFC fights while it built. So there's that.

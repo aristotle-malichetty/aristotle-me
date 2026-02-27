@@ -1,6 +1,6 @@
 ---
 title: Why I Moved Away from WordPress (And What I Use Now)
-description: After years of wrestling with plugins, slow load times, and security patches, I finally ditched WordPress. Here's what I replaced it with and why.
+description: I had a WordPress site for two years and barely touched it. Not because I didn't have things to write — because I didn't feel like opening the dashboard. Here's what I replaced it with.
 date: 2026-02-20
 tags:
   - Web Development
@@ -9,44 +9,83 @@ tags:
 featured: true
 ---
 
-For years, WordPress was my default. Need a website? WordPress. Need a blog? WordPress. Client wants a landing page? WordPress with Elementor. It was the safe, familiar choice — and for a while, it worked.
+I had a WordPress site for about two years. Bricks theme, Elementor page builder — the standard setup. It looked fine. And I barely touched it.
 
-But as I got deeper into modern web development, I started noticing all the things I'd been ignoring.
+Not because I didn't have things to write. I solve problems for my clients every day — analytics setups, automations, API integrations. Any of those could be a blog post. But I never wrote them up because I didn't feel like logging into the WordPress dashboard to do it.
 
-## The Breaking Point
+That's the real reason I left. Not performance. Not security. Not plugins. I just didn't want to open it.
 
-It wasn't one thing. It was death by a thousand paper cuts:
+## The Real Problem
 
-- **Speed**: A "simple" blog with 5 plugins took 3+ seconds to load. My Lighthouse scores were embarrassing.
-- **Security**: I was spending more time updating plugins and patching vulnerabilities than writing content.
-- **Hosting costs**: Managed WordPress hosting that could actually handle traffic wasn't cheap.
-- **The plugin tax**: Every feature required a plugin. Every plugin required updates. Every update risked breaking something.
+For the last couple of months, I've been using Claude Code every single day. It's my primary tool for building software. One day I thought: I use Claude Code every day. I don't use WordPress ever. Why am I not managing my blog from the tool I actually use?
 
-The final straw was when a client's site got hacked through an outdated contact form plugin. I'd been meaning to update it for weeks.
+WordPress stores content in a database. Claude Code works with files. These two worlds don't play well together. Every content change means logging into a dashboard, navigating menus, dealing with the block editor or Elementor's drag-and-drop builder. I don't like designing websites in page builders — it takes too much time. I like *building* websites.
+
+If I could write and publish blog posts directly from Claude Code, I'd actually write them. That was the whole thesis.
+
+## What I Actually Needed
+
+Before looking at any tool, I wrote down my criteria. Whatever I switch to has to check every box:
+
+- **Claude Code has to be the primary interface.** I use it every day — my blog should live there too.
+- **A simple CMS for when I'm away from my Mac.** Not a full dashboard — just a lightweight way to manage content from a browser.
+- **No page builders. No drag-and-drop. No design work.** I want Claude Code to handle that.
+- **Publish blog posts from my terminal.** Write, push, live. That's it.
+- **Strong SEO out of the box.** I don't want to install 5 plugins to get basic meta tags and sitemaps working.
+- **Fast.** Not "fast for WordPress" fast. Actually fast.
+- **Secure by default.** Static HTML doesn't get hacked. No database to breach, no plugins to exploit, no admin panel to brute-force. I don't want to worry about it.
+
+WordPress failed on almost every one of these. That's not a WordPress problem — it's a mismatch problem. WordPress is built for people who want a dashboard. I want a terminal.
+
+## How I Found Astro
+
+I first heard about Astro through a friend on Facebook. He'd built an open-source project called [Astro WordPress Headless Ryze](https://github.com/ruhanirabin/astro-wordpress-headless-ryze) — basically a way to run WordPress as a headless CMS with Astro as the frontend. He shared the repo and a walkthrough video. I watched it and thought, okay, this Astro thing looks interesting.
+
+I'm part of a bunch of Facebook groups where people share software, lifetime deals, tech tips — I've been in that world for years, and I have a few good friends who keep me updated on what's happening in the industry. In one of those groups, someone was selling a lifetime deal for **PhantomWP** — a product that does the same thing my friend built, but wrapped in a polished UI. You connect your WordPress site, it converts everything to Astro, and you manage it through their platform with a built-in terminal and GitHub integration.
+
+That's how Astro got on my radar. Two different people, two different approaches, both pointing at the same framework.
+
+## Trying to Make It Work with WordPress
+
+I looked into PhantomWP seriously. The idea was appealing — keep WordPress for content, get Astro's speed for the frontend. But it was still in beta (v1.0.0-beta-10.0), it added a dependency on their cloud platform, and at the end of the day, headless WordPress is still WordPress. I'd still be dealing with the dashboard, the plugins, the database. Just with an extra layer on top.
+
+**Ghost CMS** came up next. I asked Claude Code to research alternatives, and Ghost was the top suggestion. Beautiful editor, clean publishing experience. But it needs a server (Node.js + database), costs $9-25/month on Ghost Pro, and the content still lives in a database Claude Code can't touch directly. The only advantage is the writing experience — and I'm in Claude Code 90% of the time, so that doesn't matter to me.
+
+Neither option checked my boxes. I didn't want to bolt something onto WordPress. I wanted to start fresh.
 
 ## What I Use Now
 
-I moved to **Astro** — a modern static-site generator that ships zero JavaScript by default. Here's why it fits:
+I asked Claude Code to find me the right stack — something where I can write blog posts from my terminal, push to GitHub, and have it live. No dashboards, no databases, no server to maintain.
 
-### Performance
-Astro generates pure HTML at build time. No runtime JavaScript framework loading in the browser. My pages load in under 500ms.
+Astro was already on my mind from my friend's project and the PhantomWP research. When Claude Code came back recommending it too, the decision was easy. Astro generates static HTML at build time — no JavaScript framework running in the browser, pages load fast, and there's nothing to hack because there's nothing running on a server.
 
-### Content Management
-I use **Keystatic** for content management. It gives me a clean admin UI at `/keystatic` that edits Markdown files directly in the repo. No database. No server. Version-controlled content.
+But I still wanted a fallback. What if I'm not on my Mac? What if I want to write a quick draft from my phone or someone else's computer? I needed some kind of simple, lightweight CMS. Claude Code did some more research and suggested **Keystatic**.
 
-### Deployment
-Everything deploys to **Cloudflare Pages** for free. Global CDN, automatic SSL, preview deployments on every branch. It just works.
+I was confused at first. What is Keystatic? Turns out it's dead simple — it works with Markdown files, it's open source, free, and you just connect it to GitHub. It reads the files from the repo and gives you a visual admin UI at `/keystatic`. That's it. No database. No server. No hosting costs.
 
-### Developer Experience
-Astro lets me use React, Vue, or Svelte components when I need interactivity — but most of the time, I don't. The `.astro` component format is clean and intuitive.
+The key part: Claude Code edits the same files. There's no conflict. I can write a blog post from Keystatic's UI, or I can tell Claude Code to create one — either way, it's just a file in the repo.
+
+For hosting, I went with **Cloudflare Pages**. I almost chose Vercel, but their free Hobby plan doesn't allow commercial use — my site has SaaS projects and consulting, so that's commercial. Cloudflare Pages has no such restriction. Unlimited bandwidth, global CDN, automatic SSL, $0/month. I was already using Cloudflare for domains, so it was a one-click connect.
+
+## The Workflow Now
+
+This is what it looks like today:
+
+**Writing a blog post:** I tell Claude Code to create one. It makes a Markdoc file with frontmatter. I push to GitHub. Cloudflare deploys it. Live.
+
+**Writing from a browser:** I go to `/keystatic`, write in the visual editor, save. It commits to the repo. Cloudflare deploys.
+
+**Updating the design:** I tell Claude Code what to change. It edits the component files. I push. Live.
+
+No dashboards. No page builders. No plugin updates. Just a terminal, markdown files, and `git push`.
 
 ## The Trade-offs
 
 I won't pretend there aren't downsides:
 
-- **No plugin ecosystem**: You build what you need or find npm packages.
-- **Technical barrier**: You need to be comfortable with code. This isn't for non-technical clients.
-- **Dynamic features**: Things like comments, search, and forms require third-party services or API routes.
+- **No plugin ecosystem.** You build what you need or find npm packages.
+- **Technical barrier.** You need to be comfortable with code. This isn't for non-technical clients.
+- **Dynamic features.** Things like comments and forms need API routes or third-party services.
 
 For me, these trade-offs are worth it. I'd rather spend 30 minutes building a feature than 30 minutes debugging why a plugin update broke my site.
 
@@ -58,4 +97,4 @@ WordPress is still the right choice for:
 - Sites that need dozens of integrations out of the box
 - Teams with existing WordPress expertise
 
-But if you're a developer building a blog, portfolio, or marketing site — give Astro a look. You might not go back.
+But if you're a developer who lives in the terminal — especially if you're building with AI tools like Claude Code every day — you shouldn't be logging into a WordPress dashboard to publish a blog post. There's a better way.

@@ -54,7 +54,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
         </div>
       )}
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" id="posts-grid">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-3xl lg:max-w-5xl mx-auto" id="posts-grid">
         {postsWithReadingTime.map(({ post, readingTime }) => (
           <div data-tags={JSON.stringify(post.data.tags)}>
             <BlogCard

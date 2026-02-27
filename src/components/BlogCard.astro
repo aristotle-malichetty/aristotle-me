@@ -21,9 +21,9 @@ const formattedDate = date.toLocaleDateString('en-US', {
 
 <a
   href={`/blog/${slug}`}
-  class="group flex flex-col h-full p-5 sm:p-6 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] hover:border-[var(--color-border-dark)]/20 dark:hover:border-[var(--color-border-light)]/20 transition-all duration-300"
+  class="group flex flex-col h-full p-6 sm:p-7 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] hover:border-[var(--color-border-dark)]/20 dark:hover:border-[var(--color-border-light)]/20 transition-all duration-300"
 >
-  <div class="flex items-center gap-2 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-3">
+  <div class="flex items-center gap-2 text-xs sm:text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-3">
     <time datetime={date.toISOString()}>{formattedDate}</time>
     {readingTime && (
       <>
@@ -32,10 +32,10 @@ const formattedDate = date.toLocaleDateString('en-US', {
       </>
     )}
   </div>
-  <h3 class="font-display text-base sm:text-lg font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors leading-snug">
+  <h3 class="font-display text-lg sm:text-xl font-semibold mb-3 group-hover:text-[var(--color-accent)] transition-colors leading-snug">
     {title}
   </h3>
-  <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-4 line-clamp-2 flex-1">
+  <p class="text-sm sm:text-[15px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-5 line-clamp-3 flex-1">
     {description}
   </p>
   {tags.length > 0 && <TagList tags={tags} />}
