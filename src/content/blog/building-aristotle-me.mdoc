@@ -52,6 +52,14 @@ I looked at how Substack handles their blog posts — reading time at the top, c
 
 The goal was simple: make it feel like a real publication, not a side project.
 
+### Mobile TOC
+
+The desktop TOC works great — sticky sidebar, collapse toggle, active section highlighting. But it only shows at 1280px and above. On mobile, readers just scroll. For a post with 15 sections, that's a lot of blind scrolling.
+
+I added a floating button in the bottom-right corner that opens a bottom sheet with the full section list. Tap a section, it smooth scrolls there and the sheet closes. The same IntersectionObserver that highlights the active section in the desktop TOC highlights it in the mobile sheet too — both use the same `data-toc-link` attributes, so one observer drives both.
+
+The annoying part was `overflow-x: clip` on `html`. I'd added it earlier to prevent the desktop TOC from causing horizontal scroll (it's positioned outside the content area). But `clip` on `html` also clips `position: fixed` elements — so the floating button was half-visible, cut off at the edge. Moving `overflow-x: clip` to `body` instead fixed it. Still prevents the TOC scrollbar, doesn't clip fixed elements.
+
 ## Building the Comment System
 
 I wanted comments. Claude Code gave me three options:
