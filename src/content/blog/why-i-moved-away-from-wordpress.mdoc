@@ -57,17 +57,23 @@ Neither option checked my boxes. I didn't want to bolt something onto WordPress.
 
 I asked Claude Code to find me the right stack — something where I can write blog posts from my terminal, push to GitHub, and have it live. No dashboards, no databases, no server to maintain.
 
+### Astro
+
 Astro was already on my mind from my friend's project and the PhantomWP research. When Claude Code came back recommending it too, the decision was easy. Astro generates static HTML at build time — no JavaScript framework running in the browser, pages load fast, and there's nothing to hack because there's nothing running on a server.
 
-But I still wanted a fallback. What if I'm not on my Mac? What if I want to write a quick draft from my phone or someone else's computer? I needed some kind of simple, lightweight CMS. Claude Code did some more research and suggested **Keystatic**.
+### Keystatic
+
+I still wanted a fallback. What if I'm not on my Mac? What if I want to write a quick draft from my phone or someone else's computer? I needed some kind of simple, lightweight CMS. Claude Code did some more research and suggested **Keystatic**.
 
 I was confused at first. What is Keystatic? Turns out it's dead simple — it works with Markdown files, it's open source, free, and you just connect it to GitHub. It reads the files from the repo and gives you a visual admin UI at `/keystatic`. That's it. No database. No server. No hosting costs.
 
 The key part: Claude Code edits the same files. There's no conflict. I can write a blog post from Keystatic's UI, or I can tell Claude Code to create one — either way, it's just a file in the repo.
 
-For hosting, I went with **Cloudflare Pages**. I almost chose Vercel, but their free Hobby plan doesn't allow commercial use — my site has SaaS projects and consulting, so that's commercial. Cloudflare Pages has no such restriction. Unlimited bandwidth, global CDN, automatic SSL, $0/month. I was already using Cloudflare for domains, so it was a one-click connect.
+### Cloudflare Pages
 
-## The Workflow Now
+I almost chose Vercel for hosting, but their free Hobby plan doesn't allow commercial use — my site has SaaS projects and consulting, so that's commercial. Cloudflare Pages has no such restriction. Unlimited bandwidth, global CDN, automatic SSL, $0/month. I was already using Cloudflare for domains, so it was a one-click connect.
+
+## My Workflow: Terminal to Live in 60 Seconds
 
 This is what it looks like today:
 

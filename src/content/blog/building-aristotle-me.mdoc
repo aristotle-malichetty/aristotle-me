@@ -11,21 +11,15 @@ featured: true
 
 I spent the last few days building this site from scratch. Not "from a template" scratch — from `npm create astro@latest` scratch. The whole thing took about 4-6 hours of actual work (and yes, I was watching UFC videos in between). Here's what actually happened.
 
-## How It Started
+## From Spec to Scaffold
 
 I wrote about the full decision journey — why WordPress wasn't working, the tools I considered, and how I landed on Astro + Keystatic + Cloudflare — in a [separate post](/blog/why-i-moved-away-from-wordpress). Go read that one first if you want the backstory.
 
 The short version: I use Claude Code every day but never touched my WordPress dashboard. So I decided to rebuild the whole site in a stack I can manage from my terminal.
 
-Once I had the stack figured out, I wrote a full build spec in a Claude chat conversation — site structure, content schemas, design direction, component breakdown, deployment config. Then I handed that spec to Claude Code in plan mode and it scaffolded the entire project. From there, I iterated.
-
-## The Build Spec Approach
-
 I didn't open my editor and start coding. I started in Claude chat (the conversation UI, not Claude Code) and talked through everything — what pages I need, what the content schemas should look like, design direction, deployment config. By the end of that conversation, Claude had given me a full product spec.
 
-Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project — Astro setup, Keystatic config, all pages and components, SEO, Cloudflare deployment. The whole initial site came from that one spec.
-
-From there, I iterated on what was generated. That's where the real work started.
+Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project — Astro setup, Keystatic config, all pages and components, SEO, Cloudflare deployment. The whole initial site came from that one spec. From there, I iterated on what was generated. That's where the real work started.
 
 ## The Blog Design
 
@@ -79,27 +73,21 @@ If someone typed `<script>alert('hi')</script>` as their name, it would execute.
 
 The fix was simple — an `escapeHtml()` function that converts `<`, `>`, `"`, `'`, and `&` to their HTML entities. Applied it everywhere user content touches the DOM. But the lesson was real: it's easy to miss when you're moving fast and the feature "works."
 
-## The UI Was Bland
+## Fixing the Design with Playwright MCP
 
-After building everything, I installed the **Playwright MCP** into my Claude Code workflow so it could actually see and verify the UI. I told it to go through the whole site and tell me what could be improved.
+After building everything, I installed the **Playwright MCP** into my Claude Code workflow so it could actually see and verify the UI — not just the code, but how it looks in a real browser.
 
-Honestly, the initial design was plain. Functional but bland. Claude Code came back with suggestions — a warmer color palette, better card elevations, the white-and-cement color pattern you see now. It looked significantly better after that pass.
+I told it to go through the whole site and tell me what could be improved. Honestly, the initial design was plain. Functional but bland. Claude Code came back with suggestions — a warmer color palette, better card elevations, the white-and-cement color pattern you see now. It looked significantly better after that pass.
 
 I also pulled two recommendations from my LinkedIn and added them as testimonials. The original reviews were long — nobody reads a full paragraph from a stranger. So I trimmed them down to the strongest two sentences each.
 
-## The Resume Page I Deleted
+## Things I Built and Then Removed
 
-I built a full resume page. Then I deleted it.
+**The resume page.** I built a full resume page, then deleted it. Nowadays every job requires a customized resume — having a generic one on my website doesn't make sense. LinkedIn already serves that purpose. I replaced it with an About section instead: what I'm working on, who I've worked with, what I do, and the tools I use.
 
-Nowadays every job requires a customized resume. Having a generic one on my website doesn't make sense. And LinkedIn already serves that purpose. So I removed the whole page and built out the About section instead — what I'm working on, who I've worked with, what I do, and the tools I use.
+**The pre-commit hook.** I was worried about accidentally publishing draft blog posts, so I built a git hook that scans every staged file for `draft: true` and blocks the commit. Then I realized the code already filters out drafts — they never show on the live site regardless. And if I ever use Keystatic from a browser, drafts need to be in the repo for the CMS to see them. The hook would break that. Removed it two commits later.
 
-## The Git Hook I Over-Engineered
-
-I was worried about accidentally publishing draft blog posts. So I built a pre-commit hook that scans every staged file for `draft: true` and blocks the commit.
-
-Then I realized: the code already filters out drafts. They never show on the live site regardless. And if I ever use Keystatic from a browser (GitHub storage mode), drafts need to be in the repo for the CMS to see them. The hook would break that.
-
-Removed it two commits later. Lesson: before building a safety net, check if the net already exists.
+Lesson from both: knowing when to cut something is just as important as knowing how to build it.
 
 ## The Copywriting Pass
 
@@ -116,11 +104,9 @@ Zero functionality changed. More impact than any technical feature I shipped.
 ## The Numbers
 
 - **4-6 hours** of actual build time
-- **9 commits** from scaffold to current state
-- **~20 files** across components, pages, content, and config
-- **0 plugins** beyond core Astro integrations
 - **Sub-500ms page loads** on a global CDN
 - **$0/month** hosting cost
+- **0 plugins** beyond core Astro integrations
 
 The site is open source: [github.com/aristotlem/aristotle-me](https://github.com/aristotlem/aristotle-me)
 
