@@ -1,0 +1,20 @@
+#!/bin/sh
+# Pre-commit hook: prevent draft blog posts from being committed.
+# Files with "draft: true" in frontmatter are automatically unstaged.
+
+draft_files=""
+
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep '^src/content/blog/.*\.mdoc$'); do
+  # Read the staged version of the file, not the working copy
+  if git show ":$file" 2>/dev/null | head -30 | grep -q '^draft: true'; then
+    git reset -q HEAD "$file"
+    draft_files="$draft_files\n  - $file"
+  fi
+done
+
+if [ -n "$draft_files" ]; then
+  echo "Draft posts excluded from commit:$draft_files"
+  echo "Set draft: false when ready to publish."
+fi
+
+exit 0
