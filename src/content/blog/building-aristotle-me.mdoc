@@ -21,6 +21,8 @@ I didn't open my editor and start coding. I started in Claude chat (the conversa
 
 Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project — Astro setup, Keystatic config, all pages and components, SEO, Cloudflare deployment. The whole initial site came from that one spec. From there, I iterated on what was generated. That's where the real work started.
 
+![The build spec Claude generated — every page, every tool, every design decision laid out before writing a single line of code.](../../assets/images/blog/claude-build-spec.jpg)
+
 ## Git Init First, Always
 
 One of the best habits I picked up: initialize a git repo the moment the project exists, and commit after every meaningful change. Not at the end. Not when it's "ready." From the very first scaffold.
@@ -38,6 +40,14 @@ I committed locally after every feature, every fix, every refactor. Not to push 
 I wanted the blog to feel premium. Clean. Like reading something on Substack or Medium — not a developer's default markdown page.
 
 I looked at how Substack handles their blog posts — reading time at the top, comment count, share buttons. I basically copied the layout: time to read, share icons (the share button style is almost straight from Substack), and a table of contents on the side that scrolls with the post and collapses when you click it.
+
+**My site:**
+
+![The aristotle.me blog layout — byline, reading time, collapsible table of contents. Heavily inspired by Substack.](../../assets/images/blog/blog-layout-aristotle.png)
+
+**Substack:**
+
+![A typical Substack post for comparison — same structure: title, subtitle, author row, engagement bar, sticky TOC on the left.](../../assets/images/blog/blog-layout-substack.png)
 
 The goal was simple: make it feel like a real publication, not a side project.
 
@@ -74,6 +84,8 @@ So I rebuilt it. Now when you click "Reply," an inline form appears right below 
 Each comment form needs its own Turnstile widget for bot protection. The main form has one. When someone clicks "Reply," a second Turnstile widget renders inline in the reply form.
 
 Managing two Turnstile instances on the same page — initializing them, resetting them after submission, cleaning them up when the reply form closes — was more annoying than the actual comment storage logic. It works, but it was the most frustrating part of the whole build.
+
+![The comment system — Turnstile widget, threaded replies, inline reply form. More work than it looks.](../../assets/images/blog/comment-system.png)
 
 ## The XSS I Almost Shipped
 

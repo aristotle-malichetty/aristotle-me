@@ -23,13 +23,19 @@ export default config({
         }),
         coverImage: fields.image({
           label: 'Cover Image',
-          directory: 'public/images/blog',
-          publicPath: '/images/blog/',
+          directory: 'src/assets/images/blog',
+          publicPath: '../../assets/images/blog/',
         }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
         featured: fields.checkbox({ label: 'Featured', defaultValue: false }),
         content: fields.markdoc({
           label: 'Content',
+          options: {
+            image: {
+              directory: 'src/assets/images/blog',
+              publicPath: '../../assets/images/blog/',
+            },
+          },
         }),
       },
     }),
@@ -46,8 +52,8 @@ export default config({
         github: fields.url({ label: 'GitHub URL' }),
         coverImage: fields.image({
           label: 'Cover Image',
-          directory: 'public/images/projects',
-          publicPath: '/images/projects/',
+          directory: 'src/assets/images/projects',
+          publicPath: '../../assets/images/projects/',
         }),
         tags: fields.array(fields.text({ label: 'Tag' }), {
           label: 'Tags',

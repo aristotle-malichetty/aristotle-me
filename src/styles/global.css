@@ -220,6 +220,13 @@ body {
 .prose img {
   border-radius: 0.75rem;
   margin: 2em 0;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border-light);
+}
+
+.dark .prose img {
+  border-color: var(--color-border-dark);
 }
 
 .prose hr {
@@ -234,12 +241,12 @@ body {
 /* Desktop TOC sidebar */
 .toc-link {
   color: var(--color-text-secondary-light);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .toc-link:hover {
   color: var(--color-text-primary-light);
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .toc-link.active {

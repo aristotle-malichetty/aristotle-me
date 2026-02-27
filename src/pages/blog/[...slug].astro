@@ -4,6 +4,7 @@ export const prerender = true;
 import BaseLayout from '@layouts/BaseLayout.astro';
 import TagList from '@components/TagList.astro';
 import CommentSection from '@components/CommentSection.astro';
+import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import { ArrowLeft, ArrowRight, Calendar, Clock, Link, Share2, MessageCircle, X as XIcon, Mail } from '@lucide/astro';
 
@@ -33,6 +34,7 @@ const formattedDate = post.data.date.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
+  timeZone: 'UTC',
 });
 
 const tocHeadings = headings.filter((h) => h.depth <= 3);
@@ -56,25 +58,25 @@ const jsonLd = {
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
-  image={post.data.coverImage}
+  image={post.data.coverImage?.src}
   type="article"
   publishedDate={post.data.date.toISOString()}
 >
   <article class="py-12 sm:py-16">
     <!-- Header area — always centered 680px -->
     <div class="max-w-[680px] mx-auto px-4 sm:px-6">
-      <!-- Back link -->
-      <a
-        href="/blog"
-        class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors mb-10"
-      >
-        <ArrowLeft class="w-4 h-4" />
-        All posts
-      </a>
-
       <!-- Article Header -->
       <header class="mb-8 stagger">
-        {post.data.tags.length > 0 && <TagList tags={post.data.tags} class="mb-5" />}
+        <div class="flex items-center justify-between mb-8">
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
+          >
+            <ArrowLeft class="w-4 h-4" />
+            All posts
+          </a>
+          {post.data.tags.length > 0 && <TagList tags={post.data.tags} />}
+        </div>
 
         <h1 class="font-display text-3xl sm:text-[2.5rem] sm:leading-[1.15] font-bold tracking-tight mb-5">
           {post.data.title}
@@ -118,10 +120,13 @@ const jsonLd = {
 
       <!-- Cover image -->
       {post.data.coverImage && (
-        <img
+        <Image
           src={post.data.coverImage}
           alt={post.data.title}
           class="w-full rounded-xl mb-10"
+          widths={[480, 768, 1024]}
+          sizes="(max-width: 680px) 100vw, 680px"
+          loading="eager"
         />
       )}
 
@@ -265,7 +270,7 @@ const jsonLd = {
       <!-- Post preview card -->
       <div class="rounded-xl overflow-hidden bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] mb-6">
         {post.data.coverImage ? (
-          <img src={post.data.coverImage} alt={post.data.title} class="w-full h-36 object-cover" />
+          <Image src={post.data.coverImage} alt={post.data.title} class="w-full h-36 object-cover" width={400} height={144} />
         ) : (
           <div class="w-full h-36 bg-gradient-to-br from-[var(--color-card-light)] via-[var(--color-accent)]/20 to-[var(--color-card-light)] dark:from-[var(--color-card-dark)] dark:via-[var(--color-accent)]/20 dark:to-[var(--color-card-dark)]"></div>
         )}
