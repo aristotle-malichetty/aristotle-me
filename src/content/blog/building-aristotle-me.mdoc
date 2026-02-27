@@ -5,6 +5,7 @@ date: 2026-02-27
 tags:
   - Web Development
   - Astro
+  - SEO
   - Building in Public
 featured: true
 ---
@@ -148,6 +149,47 @@ The results speak for themselves:
 3.1MB of raw images down to 68kB on mobile. That 1.4MB Substack screenshot? 18kB.
 
 The lesson: the initial build is never done. The best improvements come from actually using the site and noticing what's slow, what's heavy, what doesn't feel right. And plan mode is perfect for this kind of work — you describe the problem, let Claude Code research the approach, review the plan, then execute.
+
+## SEO and Social Share Images
+
+After the image optimization, I looked at what was still missing compared to a WordPress site with Rank Math. Turns out — a lot of small things.
+
+No `twitter:creator` tag. No `article:modified_time`. No `og:locale`. No structured data beyond a basic BlogPosting schema. No breadcrumbs in Google results. And the biggest gap: no social share images. Every time someone shared a blog post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
+
+WordPress plugins generate all of this automatically. When you move to a custom stack, you have to build it yourself.
+
+### Auto-Generated OG Images
+
+I didn't want to design a share image every time I publish a post. So I built a system that generates them at build time — every blog post gets its own branded 1200x630 PNG automatically.
+
+The stack: **satori** (converts JSX-like markup to SVG — the same engine behind Vercel's OG images) and **@resvg/resvg-js** (converts SVG to PNG). Both run at build time in Node.js, so they don't affect site performance at all. The images are static files by the time they hit Cloudflare.
+
+The first version was bland. Blue rectangle, white text, an "AM" circle in the corner. It looked like every other auto-generated OG image on the internet. So I iterated:
+
+- Swapped the generic "AM" circle for my pixel art avatar
+- Added the post description below the title
+- Put the avatar next to "aristotle.me" as a unified byline at the top — instead of having them stranded on opposite corners
+- Added a subtle gradient instead of flat blue
+- Anchored the content to the bottom so the reading flow goes brand → title → description
+
+Small changes, but the difference between "auto-generated" and "intentional" is usually just a few design decisions.
+
+One thing that tripped me up: resvg uses native Node.js bindings, and Vite's bundler tried to process the `.node` file during the Cloudflare build. It crashed with "Unexpected character" errors on binary data. The fix was adding `@resvg/resvg-js` to `vite.ssr.external` in the Astro config so Rollup leaves it alone. Also, satori doesn't support woff2 fonts — Google Fonts serves woff2 by default to modern browsers. I had to fake an old IE User-Agent in the font fetch to get TTF format instead.
+
+### The Rest of the SEO
+
+Beyond OG images, I added:
+
+- **Twitter meta tags** — `twitter:site` and `twitter:creator` so posts link back to my account
+- **Article metadata** — `article:author` and `article:modified_time` for blog posts
+- **Person + WebSite JSON-LD** on the homepage — helps Google build Knowledge Panels
+- **BreadcrumbList JSON-LD** on blog posts — enables breadcrumb snippets in search results
+- **Enhanced BlogPosting schema** — added `image`, `wordCount`, `inLanguage`, `publisher`, and `mainEntityOfPage`
+- **RSS feed** — added author name and post categories/tags to each item
+
+The share modal on blog posts also got an upgrade. It used to show a gradient placeholder when a post had no cover image. Now it shows the actual generated OG image — so what you see in the modal is exactly what people see when they click your shared link.
+
+None of this changes how the site looks or feels. But it's the difference between showing up on social media as a bare URL and showing up as a branded card with your title, description, and avatar.
 
 ## The Numbers
 
