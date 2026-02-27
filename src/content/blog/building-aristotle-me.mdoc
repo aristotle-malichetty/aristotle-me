@@ -21,6 +21,18 @@ I didn't open my editor and start coding. I started in Claude chat (the conversa
 
 Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project — Astro setup, Keystatic config, all pages and components, SEO, Cloudflare deployment. The whole initial site came from that one spec. From there, I iterated on what was generated. That's where the real work started.
 
+## Git Init First, Always
+
+One of the best habits I picked up: initialize a git repo the moment the project exists, and commit after every meaningful change. Not at the end. Not when it's "ready." From the very first scaffold.
+
+Two reasons this matters when you're building with Claude Code:
+
+1. **Context.** Claude Code can read your git history. When it sees what you've already done — what files changed, what the commit messages say — it makes better decisions about what to do next. Your commit history is basically a conversation log between you and your project.
+
+2. **Rollback.** If Claude Code makes a change that breaks something, you're one `git checkout` away from the last working state. No panic. No "undo" guessing. Just revert and try a different approach.
+
+I committed locally after every feature, every fix, every refactor. Not to push somewhere — just to save my progress. It costs nothing and it's saved me more than once.
+
 ## The Blog Design
 
 I wanted the blog to feel premium. Clean. Like reading something on Substack or Medium — not a developer's default markdown page.
