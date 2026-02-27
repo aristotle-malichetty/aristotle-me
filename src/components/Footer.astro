@@ -4,7 +4,7 @@ import { Github, Linkedin, Twitter, Mail } from '@lucide/astro';
 const year = new Date().getFullYear();
 
 const socialLinks = [
-  { href: 'https://github.com/aristotlem', label: 'GitHub', icon: Github },
+  { href: 'https://github.com/aristotle-malichetty', label: 'GitHub', icon: Github },
   { href: 'https://linkedin.com/in/aristotlem', label: 'LinkedIn', icon: Linkedin },
   { href: 'https://x.com/aristotlem', label: 'X', icon: Twitter },
   { href: 'mailto:mailaristotle@gmail.com', label: 'Email', icon: Mail },
@@ -29,7 +29,8 @@ const socialLinks = [
             target={href.startsWith('mailto') ? undefined : '_blank'}
             rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
             aria-label={label}
-            class="w-9 h-9 flex items-center justify-center rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all duration-200"
+            data-copy-email={href.startsWith('mailto') ? href.replace('mailto:', '') : undefined}
+            class="w-9 h-9 flex items-center justify-center rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all duration-200 relative"
           >
             <Icon class="w-[18px] h-[18px]" />
           </a>
@@ -43,3 +44,44 @@ const socialLinks = [
     </div>
   </div>
 </footer>
+
+<script>
+  document.querySelectorAll('[data-copy-email]').forEach(el => {
+    el.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = el.getAttribute('data-copy-email');
+      if (!email) return;
+
+      try {
+        await navigator.clipboard.writeText(email);
+      } catch {
+        return;
+      }
+
+      // Contact page card — swap the email text
+      const valueP = el.querySelector('p');
+      if (valueP && valueP.textContent?.includes('@')) {
+        const original = valueP.textContent;
+        const originalColor = valueP.style.color;
+        valueP.textContent = 'Email copied!';
+        valueP.style.color = '#22c55e';
+        setTimeout(() => {
+          valueP.textContent = original;
+          valueP.style.color = originalColor;
+        }, 2000);
+        return;
+      }
+
+      // Footer icon — show tooltip
+      const existing = el.querySelector('.copy-tooltip');
+      if (existing) existing.remove();
+
+      const tooltip = document.createElement('span');
+      tooltip.textContent = 'Copied!';
+      tooltip.className = 'copy-tooltip';
+      tooltip.style.cssText = 'position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:0.65rem;background:var(--color-accent);color:white;padding:2px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;margin-bottom:4px;';
+      el.appendChild(tooltip);
+      setTimeout(() => tooltip.remove(), 2000);
+    });
+  });
+</script>

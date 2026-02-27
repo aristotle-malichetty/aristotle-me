@@ -29,8 +29,8 @@ const contacts = [
   {
     icon: Github,
     label: 'GitHub',
-    value: 'github.com/aristotlem',
-    href: 'https://github.com/aristotlem',
+    value: 'github.com/aristotle-malichetty',
+    href: 'https://github.com/aristotle-malichetty',
     description: 'Open source projects and code experiments.',
   },
 ];
@@ -60,6 +60,7 @@ const contacts = [
               href={href}
               target={href.startsWith('mailto') ? undefined : '_blank'}
               rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+              data-copy-email={href.startsWith('mailto') ? value : undefined}
               class="group p-5 sm:p-6 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] hover:border-[var(--color-accent)]/40 hover:shadow-[0_4px_20px_rgba(59,130,246,0.06)] dark:hover:shadow-[0_4px_20px_rgba(59,130,246,0.08)] transition-all duration-300"
             >
               <div class="flex items-start justify-between mb-4">
