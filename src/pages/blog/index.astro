@@ -1,10 +1,18 @@
 ---
+export const prerender = true;
+
 import BaseLayout from '@layouts/BaseLayout.astro';
 import BlogCard from '@components/BlogCard.astro';
 import { getCollection } from 'astro:content';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const posts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const postsWithReadingTime = posts.map((post) => {
+  const wordCount = (post.body || '').replace(/[#*`>\-\[\](){}|]/g, '').split(/\s+/).filter(Boolean).length;
+  const readingTime = `${Math.max(1, Math.ceil(wordCount / 250))} min read`;
+  return { post, readingTime };
+});
 
 const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
 ---
@@ -43,7 +51,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
       )}
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger" id="posts-grid">
-        {posts.map((post) => (
+        {postsWithReadingTime.map(({ post, readingTime }) => (
           <div data-tags={JSON.stringify(post.data.tags)}>
             <BlogCard
               slug={post.id}
@@ -51,6 +59,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
               description={post.data.description}
               date={post.data.date}
               tags={post.data.tags}
+              readingTime={readingTime}
             />
           </div>
         ))}

@@ -1,0 +1,463 @@
+---
+interface Props {
+  slug: string;
+  turnstileSiteKey: string;
+}
+
+const { slug, turnstileSiteKey } = Astro.props;
+---
+
+<section id="comments" class="mt-12 pt-8 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-8">
+    <h2 class="font-display text-xl font-bold tracking-tight">Discussion</h2>
+    <span
+      id="comment-count"
+      class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]"
+    ></span>
+  </div>
+
+  <!-- Top-level comment form -->
+  <form id="comment-form" class="mb-10">
+    <input type="hidden" name="post_slug" value={slug} />
+
+    <!-- Honeypot -->
+    <div class="absolute -left-[9999px]" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" name="website" id="website-honeypot" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-3 mb-3">
+      <div>
+        <input
+          type="text"
+          name="author_name"
+          placeholder="Name *"
+          required
+          maxlength="100"
+          class="w-full px-3 py-2.5 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors"
+        />
+      </div>
+      <div>
+        <input
+          type="email"
+          name="author_email"
+          placeholder="Email (optional, not displayed)"
+          maxlength="254"
+          class="w-full px-3 py-2.5 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors"
+        />
+      </div>
+    </div>
+
+    <textarea
+      name="comment_text"
+      placeholder="Share your thoughts..."
+      required
+      maxlength="5000"
+      rows="4"
+      class="w-full px-3 py-2.5 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors resize-y mb-3"
+    ></textarea>
+
+    <!-- Turnstile widget -->
+    <div id="turnstile-widget" class="mb-3" data-sitekey={turnstileSiteKey}></div>
+
+    <!-- Submit button -->
+    <button
+      type="submit"
+      class="comment-submit-btn px-5 py-2.5 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Post Comment
+    </button>
+
+    <!-- Status messages -->
+    <p class="form-error hidden mt-2 text-sm text-red-500"></p>
+    <p class="form-success hidden mt-2 text-sm text-green-500">Comment posted!</p>
+  </form>
+
+  <!-- Comments list -->
+  <div id="comments-list"></div>
+  <p
+    id="comments-empty"
+    class="hidden text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-6 text-center"
+  >
+    No comments yet. Be the first to share your thoughts!
+  </p>
+  <p
+    id="comments-loading"
+    class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-6 text-center"
+  >
+    Loading comments...
+  </p>
+</section>
+
+<!-- Turnstile script (explicit render mode) -->
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+
+<script>
+  function initCommentSection() {
+    const topForm = document.getElementById('comment-form') as HTMLFormElement | null;
+    const list = document.getElementById('comments-list');
+    const empty = document.getElementById('comments-empty');
+    const loading = document.getElementById('comments-loading');
+    const countEl = document.getElementById('comment-count');
+    const headerCountEl = document.getElementById('header-comment-count');
+    const turnstileContainer = document.getElementById('turnstile-widget');
+
+    if (!topForm || !list || !turnstileContainer) return;
+
+    const slug = (topForm.querySelector('input[name="post_slug"]') as HTMLInputElement)?.value;
+    const siteKey = turnstileContainer.dataset.sitekey || '';
+    let mainTurnstileId: string | undefined;
+    let activeReplyForm: HTMLElement | null = null;
+    let activeReplyBtn: HTMLElement | null = null;
+    let replyTurnstileId: string | undefined;
+
+    // Render Turnstile widget into a container, returns widget ID
+    function renderTurnstile(selector: string): string | undefined {
+      if (typeof (window as any).turnstile === 'undefined') return undefined;
+      return (window as any).turnstile.render(selector, {
+        sitekey: siteKey,
+        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+      });
+    }
+
+    function initMainTurnstile() {
+      if (typeof (window as any).turnstile === 'undefined') {
+        setTimeout(initMainTurnstile, 200);
+        return;
+      }
+      if (mainTurnstileId !== undefined) {
+        (window as any).turnstile.remove(mainTurnstileId);
+      }
+      mainTurnstileId = renderTurnstile('#turnstile-widget');
+    }
+
+    initMainTurnstile();
+
+    // Relative time helper
+    function timeAgo(dateStr: string): string {
+      const date = new Date(dateStr + 'Z');
+      const now = new Date();
+      const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+      if (seconds < 60) return 'just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 30) return `${days}d ago`;
+      const months = Math.floor(days / 30);
+      if (months < 12) return `${months}mo ago`;
+      return `${Math.floor(months / 12)}y ago`;
+    }
+
+    // Render a single comment
+    function renderComment(comment: any, depth: number): string {
+      const initial = comment.author_name.charAt(0).toUpperCase();
+      const canReply = depth < 2;
+      const repliesHtml = comment.replies?.length
+        ? `<div class="comment-replies">${comment.replies.map((r: any) => renderComment(r, depth + 1)).join('')}</div>`
+        : '';
+
+      return `
+        <div class="comment" data-comment-id="${comment.id}">
+          <div class="flex gap-3">
+            <div class="comment-avatar shrink-0">${initial}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-semibold text-sm">${comment.author_name}</span>
+                <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">${timeAgo(comment.created_at)}</span>
+              </div>
+              <p class="text-sm leading-relaxed mb-2 break-words">${comment.comment_text}</p>
+              ${canReply ? `<button class="reply-btn text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors" data-reply-id="${comment.id}" data-reply-name="${comment.author_name}">Reply</button>` : ''}
+              <div class="inline-reply-slot"></div>
+            </div>
+          </div>
+          ${repliesHtml}
+        </div>
+      `;
+    }
+
+    // Close any open inline reply form
+    function closeReplyForm() {
+      if (activeReplyForm) {
+        if (replyTurnstileId !== undefined) {
+          try { (window as any).turnstile.remove(replyTurnstileId); } catch {}
+          replyTurnstileId = undefined;
+        }
+        activeReplyForm.remove();
+        activeReplyForm = null;
+      }
+      if (activeReplyBtn) {
+        activeReplyBtn.style.display = '';
+        activeReplyBtn = null;
+      }
+    }
+
+    // Open inline reply form below a comment
+    function openReplyForm(commentId: string, authorName: string, slot: HTMLElement) {
+      closeReplyForm();
+
+      const replyHtml = `
+        <div class="inline-reply-form mt-3 mb-2 pl-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              Replying to <strong>${authorName}</strong>
+            </span>
+            <button type="button" class="reply-cancel text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors">Cancel</button>
+          </div>
+          <input
+            type="text"
+            class="reply-name w-full px-3 py-2 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors mb-2"
+            placeholder="Name *"
+            required
+            maxlength="100"
+          />
+          <textarea
+            class="reply-text w-full px-3 py-2 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors resize-y mb-2"
+            placeholder="Write a reply..."
+            rows="3"
+            maxlength="5000"
+          ></textarea>
+          <div class="reply-turnstile mb-2"></div>
+          <div class="flex items-center gap-2">
+            <button type="button" class="reply-submit px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-xs font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reply</button>
+            <p class="reply-error hidden text-xs text-red-500"></p>
+            <p class="reply-success hidden text-xs text-green-500">Reply posted!</p>
+          </div>
+        </div>
+      `;
+
+      slot.innerHTML = replyHtml;
+      activeReplyForm = slot.querySelector('.inline-reply-form') as HTMLElement;
+
+      // Render Turnstile in the inline form
+      const turnstileSlot = activeReplyForm.querySelector('.reply-turnstile') as HTMLElement;
+      if (turnstileSlot && typeof (window as any).turnstile !== 'undefined') {
+        replyTurnstileId = (window as any).turnstile.render(turnstileSlot, {
+          sitekey: siteKey,
+          theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+          size: 'compact',
+        });
+      }
+
+      // Pre-fill name from main form or localStorage
+      const savedName = localStorage.getItem('comment_author_name') || '';
+      const nameInput = activeReplyForm.querySelector('.reply-name') as HTMLInputElement;
+      if (nameInput && savedName) nameInput.value = savedName;
+
+      // Focus textarea
+      const textarea = activeReplyForm.querySelector('.reply-text') as HTMLTextAreaElement;
+      setTimeout(() => textarea?.focus(), 100);
+
+      // Cancel
+      activeReplyForm.querySelector('.reply-cancel')?.addEventListener('click', closeReplyForm);
+
+      // Submit
+      const submitBtn = activeReplyForm.querySelector('.reply-submit') as HTMLButtonElement;
+      const errorEl = activeReplyForm.querySelector('.reply-error') as HTMLElement;
+      const successEl = activeReplyForm.querySelector('.reply-success') as HTMLElement;
+
+      submitBtn?.addEventListener('click', async () => {
+        const name = nameInput?.value.trim();
+        const text = textarea?.value.trim();
+
+        if (!name) {
+          errorEl.textContent = 'Name is required';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+        if (!text) {
+          errorEl.textContent = 'Reply is required';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        errorEl.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Posting...';
+
+        // Get turnstile token from the inline widget
+        const turnstileInput = turnstileSlot?.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement | null;
+        const token = turnstileInput?.value || '';
+
+        const payload: Record<string, any> = {
+          post_slug: slug,
+          parent_id: Number(commentId),
+          author_name: name,
+          comment_text: text,
+          'cf-turnstile-response': token,
+        };
+
+        try {
+          const res = await fetch('/api/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            localStorage.setItem('comment_author_name', name);
+            successEl.classList.remove('hidden');
+            setTimeout(async () => {
+              closeReplyForm();
+              await loadComments();
+            }, 500);
+          } else {
+            errorEl.textContent = data.error || 'Something went wrong.';
+            errorEl.classList.remove('hidden');
+            if (replyTurnstileId !== undefined) {
+              (window as any).turnstile.reset(replyTurnstileId);
+            }
+          }
+        } catch {
+          errorEl.textContent = 'Network error. Please try again.';
+          errorEl.classList.remove('hidden');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Reply';
+        }
+      });
+    }
+
+    // Load comments
+    async function loadComments() {
+      try {
+        const res = await fetch(`/api/comments/${slug}`, { cache: 'no-store' });
+        const data = await res.json();
+
+        if (loading) loading.classList.add('hidden');
+
+        if (data.comments?.length) {
+          list.innerHTML = data.comments.map((c: any) => renderComment(c, 0)).join('');
+          if (empty) empty.classList.add('hidden');
+        } else {
+          list.innerHTML = '';
+          if (empty) empty.classList.remove('hidden');
+        }
+
+        const countText = data.total ? `${data.total}` : '';
+        const countLabel = data.total ? `${data.total} comment${data.total === 1 ? '' : 's'}` : '';
+        if (headerCountEl) headerCountEl.textContent = countText;
+        if (countEl) countEl.textContent = countLabel;
+      } catch {
+        if (loading) loading.classList.add('hidden');
+        if (empty) {
+          empty.textContent = 'Could not load comments.';
+          empty.classList.remove('hidden');
+        }
+      }
+    }
+
+    loadComments();
+
+    // Reply click — event delegation
+    list.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('.reply-btn') as HTMLElement | null;
+      if (!btn) return;
+      const id = btn.dataset.replyId || '';
+      const name = btn.dataset.replyName || '';
+      const slot = btn.closest('.flex-1')?.querySelector('.inline-reply-slot') as HTMLElement | null;
+      if (slot) {
+        openReplyForm(id, name, slot);
+        activeReplyBtn = btn;
+        btn.style.display = 'none';
+      }
+    });
+
+    // Top-level form submit
+    setupFormSubmit(topForm, null, mainTurnstileId, () => mainTurnstileId);
+
+    function setupFormSubmit(
+      form: HTMLFormElement,
+      _parentId: number | null,
+      _turnstileId: string | undefined,
+      getTurnstileId: () => string | undefined,
+    ) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('.comment-submit-btn') as HTMLButtonElement;
+        const formError = form.querySelector('.form-error') as HTMLElement;
+        const formSuccess = form.querySelector('.form-success') as HTMLElement;
+
+        if (formError) formError.classList.add('hidden');
+        if (formSuccess) formSuccess.classList.add('hidden');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Posting...';
+        }
+
+        const formData = new FormData(form);
+        const payload: Record<string, any> = {};
+        formData.forEach((val, key) => {
+          if (key === 'parent_id') return; // skip, top-level has no parent
+          payload[key] = val;
+        });
+
+        // Get Turnstile response
+        const turnstileInput = form.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement | null;
+        if (turnstileInput) {
+          payload['cf-turnstile-response'] = turnstileInput.value;
+        }
+
+        try {
+          const res = await fetch('/api/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            // Save name for future replies
+            const nameVal = payload.author_name;
+            if (nameVal) localStorage.setItem('comment_author_name', nameVal);
+
+            if (formSuccess) formSuccess.classList.remove('hidden');
+            form.reset();
+
+            const tid = getTurnstileId();
+            if (tid !== undefined) {
+              (window as any).turnstile.reset(tid);
+            }
+
+            await loadComments();
+
+            setTimeout(() => {
+              if (formSuccess) formSuccess.classList.add('hidden');
+            }, 3000);
+          } else {
+            if (formError) {
+              formError.textContent = data.error || 'Something went wrong.';
+              formError.classList.remove('hidden');
+            }
+            const tid = getTurnstileId();
+            if (tid !== undefined) {
+              (window as any).turnstile.reset(tid);
+            }
+          }
+        } catch {
+          if (formError) {
+            formError.textContent = 'Network error. Please try again.';
+            formError.classList.remove('hidden');
+          }
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Post Comment';
+          }
+        }
+      });
+    }
+  }
+
+  // Initialize and re-initialize on View Transitions
+  initCommentSection();
+  document.addEventListener('astro:after-swap', () => {
+    const container = document.getElementById('turnstile-widget');
+    if (container) container.innerHTML = '';
+    initCommentSection();
+  });
+</script>

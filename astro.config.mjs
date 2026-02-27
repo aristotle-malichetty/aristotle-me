@@ -10,8 +10,10 @@ import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
 
 export default defineConfig({
   site: 'https://aristotle.me',
-  output: 'static',
-  adapter: cloudflare(),
+  output: 'server',
+  adapter: cloudflare({
+    platformProxy: { enabled: true },
+  }),
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
