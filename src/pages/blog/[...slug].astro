@@ -40,6 +40,8 @@ const formattedDate = post.data.date.toLocaleDateString('en-US', {
 const tocHeadings = headings.filter((h) => h.depth <= 3);
 const postUrl = `https://aristotle.me/blog/${post.id}`;
 
+const ogImage = `/og/${post.id}.png`;
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -47,20 +49,43 @@ const jsonLd = {
   description: post.data.description,
   datePublished: post.data.date.toISOString(),
   ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+  image: `https://aristotle.me${ogImage}`,
+  wordCount,
+  inLanguage: 'en',
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': postUrl,
+  },
   author: {
     '@type': 'Person',
     name: 'Aristotle Malichetty',
     url: 'https://aristotle.me',
   },
+  publisher: {
+    '@type': 'Person',
+    name: 'Aristotle Malichetty',
+    url: 'https://aristotle.me',
+  },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://aristotle.me' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://aristotle.me/blog' },
+    { '@type': 'ListItem', position: 3, name: post.data.title, item: postUrl },
+  ],
 };
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
-  image={post.data.coverImage?.src}
+  image={ogImage}
   type="article"
   publishedDate={post.data.date.toISOString()}
+  modifiedDate={post.data.updatedDate?.toISOString()}
 >
   <article class="py-12 sm:py-16">
     <!-- Header area — always centered 680px -->
@@ -269,15 +294,7 @@ const jsonLd = {
 
       <!-- Post preview card -->
       <div class="rounded-xl overflow-hidden bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] mb-6">
-        {post.data.coverImage ? (
-          <Image src={post.data.coverImage} alt={post.data.title} class="w-full h-36 object-cover" width={400} height={144} />
-        ) : (
-          <div class="w-full h-36 bg-gradient-to-br from-[var(--color-card-light)] via-[var(--color-accent)]/20 to-[var(--color-card-light)] dark:from-[var(--color-card-dark)] dark:via-[var(--color-accent)]/20 dark:to-[var(--color-card-dark)]"></div>
-        )}
-        <div class="px-4 py-3">
-          <p class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-0.5">aristotle.me</p>
-          <p class="font-semibold text-sm line-clamp-2">{post.data.title}</p>
-        </div>
+        <img src={ogImage} alt={post.data.title} class="w-full object-cover" />
       </div>
 
       <!-- Share options -->
@@ -459,4 +476,5 @@ const jsonLd = {
 
   <!-- JSON-LD -->
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 </BaseLayout>

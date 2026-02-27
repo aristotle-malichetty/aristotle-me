@@ -30,6 +30,25 @@ const allProjects = await getCollection('projects');
 const featuredProjects = allProjects
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 4);
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Aristotle Malichetty',
+  url: 'https://aristotle.me',
+  sameAs: [
+    'https://linkedin.com/in/aristotlem',
+    'https://github.com/aristotle-malichetty',
+    'https://x.com/aristotle_me',
+  ],
+  jobTitle: 'Marketing Analyst & Product Builder',
+};
+
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'aristotle.me',
+  url: 'https://aristotle.me',
+};
 ---
 
 <BaseLayout
@@ -172,4 +191,7 @@ const featuredProjects = allProjects
       </div>
     </div>
   </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
 </BaseLayout>

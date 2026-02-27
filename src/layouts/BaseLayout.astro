@@ -15,9 +15,10 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   publishedDate?: string;
+  modifiedDate?: string;
 }
 
-const { title, description, image, type, publishedDate } = Astro.props;
+const { title, description, image, type, publishedDate, modifiedDate } = Astro.props;
 ---
 
 <!doctype html>
@@ -35,6 +36,7 @@ const { title, description, image, type, publishedDate } = Astro.props;
       image={image}
       type={type}
       publishedDate={publishedDate}
+      modifiedDate={modifiedDate}
     />
     <ClientRouter />
 
