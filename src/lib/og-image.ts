@@ -133,7 +133,9 @@ export async function generateOgImage(
                   type: 'div',
                   props: {
                     style: {
-                      fontSize: title.length > 60 ? 48 : title.length > 40 ? 56 : 64,
+                      fontSize: description
+                        ? (title.length > 60 ? 48 : title.length > 40 ? 56 : 64)
+                        : (title.length > 60 ? 56 : title.length > 40 ? 64 : 72),
                       fontFamily: 'Bricolage Grotesque',
                       fontWeight: 700,
                       color: 'white',

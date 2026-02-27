@@ -4,7 +4,7 @@ import type { APIRoute } from 'astro';
 import { generateOgImage } from '@/lib/og-image';
 
 export const GET: APIRoute = async () => {
-  const png = await generateOgImage('Aristotle Malichetty — Marketing Analyst & Product Builder');
+  const png = await generateOgImage('Analytics, code, and building what the problem needs.');
   return new Response(png, {
     headers: { 'Content-Type': 'image/png' },
   });
