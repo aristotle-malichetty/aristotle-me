@@ -63,7 +63,6 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
               description={post.data.description}
               date={post.data.date}
               tags={post.data.tags}
-              readingTime={readingTime}
             />
           </div>
         ))}
