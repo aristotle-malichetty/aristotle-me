@@ -337,8 +337,22 @@ body {
   overflow: hidden;
 }
 
+/* Mobile TOC bottom sheet */
+.mobile-toc-sheet-hidden {
+  transform: translateY(100%);
+}
+
+/* Hide scrollbar but keep scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Prevent body horizontal scroll from TOC overflow */
-html {
+body {
   overflow-x: clip;
 }
 

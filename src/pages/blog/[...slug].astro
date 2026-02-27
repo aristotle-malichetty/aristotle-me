@@ -6,7 +6,7 @@ import TagList from '@components/TagList.astro';
 import CommentSection from '@components/CommentSection.astro';
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
-import { ArrowLeft, ArrowRight, Calendar, Clock, Link, Share2, MessageCircle, X as XIcon, Mail } from '@lucide/astro';
+import { ArrowLeft, ArrowRight, Calendar, Clock, Link, Share2, MessageCircle, X as XIcon, Mail, List } from '@lucide/astro';
 
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 
@@ -92,15 +92,19 @@ const breadcrumbLd = {
     <div class="max-w-[680px] mx-auto px-4 sm:px-6">
       <!-- Article Header -->
       <header class="mb-8 stagger">
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-3 mb-8">
           <a
             href="/blog"
-            class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
+            class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors shrink-0"
           >
             <ArrowLeft class="w-4 h-4" />
             All posts
           </a>
-          {post.data.tags.length > 0 && <TagList tags={post.data.tags} />}
+          {post.data.tags.length > 0 && (
+            <div class="flex-1 min-w-0 flex justify-end">
+              <TagList tags={post.data.tags} class="flex-nowrap overflow-x-auto scrollbar-hide" />
+            </div>
+          )}
         </div>
 
         <h1 class="font-display text-3xl sm:text-[2.5rem] sm:leading-[1.15] font-bold tracking-tight mb-5">
@@ -351,6 +355,66 @@ const breadcrumbLd = {
     </div>
   </div>
 
+  <!-- Mobile TOC -->
+  {tocHeadings.length > 2 && (
+    <>
+      {/* Floating button */}
+      <button
+        id="mobile-toc-btn"
+        class="fixed bottom-6 right-4 z-50 xl:hidden w-12 h-12 flex items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-lg hover:bg-[var(--color-accent-hover)] transition-colors"
+        aria-label="Table of contents"
+      >
+        <List class="w-5 h-5" />
+      </button>
+
+      {/* Bottom sheet */}
+      <div
+        id="mobile-toc-overlay"
+        class="fixed inset-0 z-[100] xl:hidden opacity-0 pointer-events-none transition-opacity duration-200"
+        aria-hidden="true"
+      >
+        {/* Backdrop */}
+        <div id="mobile-toc-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+        {/* Sheet */}
+        <div
+          id="mobile-toc-sheet"
+          class="absolute bottom-0 left-0 right-0 max-h-[60vh] rounded-t-2xl bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] shadow-2xl mobile-toc-sheet-hidden overflow-hidden flex flex-col transition-transform duration-300 ease-out"
+        >
+          {/* Header */}
+          <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] shrink-0">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              Contents
+            </p>
+            <button id="mobile-toc-close" class="p-1.5 rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)] transition-colors">
+              <XIcon class="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Links */}
+          <nav class="overflow-y-auto overscroll-contain px-5 py-4">
+            <ul class="space-y-0.5">
+              {tocHeadings.map((heading) => (
+                <li>
+                  <a
+                    href={`#${heading.slug}`}
+                    data-toc-link={heading.slug}
+                    class:list={[
+                      'toc-link block text-[13px] leading-relaxed py-1.5 truncate transition-colors duration-200',
+                      heading.depth === 3 && 'pl-3.5 text-[12px]',
+                    ]}
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </>
+  )}
+
   <!-- TOC scripts -->
   <script>
     function setupTocHighlight() {
@@ -404,12 +468,65 @@ const breadcrumbLd = {
       });
     }
 
+    function setupMobileToc() {
+      const btn = document.getElementById('mobile-toc-btn');
+      const overlay = document.getElementById('mobile-toc-overlay');
+      const backdrop = document.getElementById('mobile-toc-backdrop');
+      const sheet = document.getElementById('mobile-toc-sheet');
+      const closeBtn = document.getElementById('mobile-toc-close');
+
+      if (!btn || !overlay || !sheet) return;
+
+      function openSheet() {
+        overlay!.classList.remove('pointer-events-none', 'opacity-0');
+        overlay!.classList.add('opacity-100');
+        overlay!.setAttribute('aria-hidden', 'false');
+        sheet!.classList.remove('mobile-toc-sheet-hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSheet() {
+        overlay!.classList.add('opacity-0', 'pointer-events-none');
+        overlay!.classList.remove('opacity-100');
+        overlay!.setAttribute('aria-hidden', 'true');
+        sheet!.classList.add('mobile-toc-sheet-hidden');
+        document.body.style.overflow = '';
+      }
+
+      btn.addEventListener('click', openSheet);
+      backdrop?.addEventListener('click', closeSheet);
+      closeBtn?.addEventListener('click', closeSheet);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay!.getAttribute('aria-hidden') === 'false') {
+          closeSheet();
+        }
+      });
+
+      // Tapping a link: smooth scroll + close
+      sheet.querySelectorAll('a[data-toc-link]').forEach((link) => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const slug = (link as HTMLAnchorElement).getAttribute('data-toc-link');
+          const target = slug ? document.getElementById(slug) : null;
+          if (target) {
+            closeSheet();
+            setTimeout(() => {
+              const top = target.getBoundingClientRect().top + window.scrollY - 80;
+              window.scrollTo({ top, behavior: 'smooth' });
+            }, 200);
+          }
+        });
+      });
+    }
+
     let tocObserver: IntersectionObserver | undefined;
 
     function initToc() {
       tocObserver?.disconnect();
       tocObserver = setupTocHighlight() || undefined;
       setupTocToggle();
+      setupMobileToc();
     }
 
     initToc();
