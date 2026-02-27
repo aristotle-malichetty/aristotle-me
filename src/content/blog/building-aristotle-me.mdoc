@@ -125,6 +125,30 @@ The About page was carrying the whole site while the homepage — the first thin
 
 Zero functionality changed. More impact than any technical feature I shipped.
 
+## The Image Optimization Rabbit Hole
+
+After publishing, I opened DevTools and looked at the network tab. The blog post images — screenshots of layouts, the comment system, the build spec — were loading as raw PNGs and JPGs straight from the `public/` folder. No compression, no responsive sizing, no WebP. One screenshot was 1.4MB. For a site that's supposed to be fast, that's embarrassing.
+
+Astro has a built-in `<Image>` component that handles all of this — WebP conversion, responsive `srcset`, lazy loading, layout shift prevention. But it only works on images that go through Vite's build pipeline, which means they need to live in `src/`, not `public/`.
+
+I told Claude Code to figure out how to wire this up. It entered plan mode, read through the Astro and Markdoc docs, explored the codebase, and came back with an 8-step plan. The tricky part wasn't moving files around — it was making Markdoc's image rendering use Astro's `<Image>` component instead of plain `<img>` tags, and making sure Keystatic's image uploads would still land in the right place with the right relative paths.
+
+The fix touched eight files: a custom Markdoc image node, an Astro component with a fallback for external URLs, updated content schemas, Keystatic config changes, and the blog post template. Claude Code built the whole thing, ran the build, and confirmed it worked.
+
+The results speak for themselves:
+
+| Image | Original | WebP (480w) | WebP (1024w) | Reduction |
+|---|---|---|---|---|
+| blog-layout-substack.png | 1,468kB | 18kB | 124kB | 99% |
+| blog-layout-aristotle.png | 872kB | 19kB | 94kB | 98% |
+| claude-build-spec.jpg | 568kB | 24kB | 71kB | 96% |
+| comment-system.png | 264kB | 7kB | 24kB | 97% |
+| **Total** | **3,172kB** | **68kB** | **313kB** | |
+
+3.1MB of raw images down to 68kB on mobile. That 1.4MB Substack screenshot? 18kB.
+
+The lesson: the initial build is never done. The best improvements come from actually using the site and noticing what's slow, what's heavy, what doesn't feel right. And plan mode is perfect for this kind of work — you describe the problem, let Claude Code research the approach, review the plan, then execute.
+
 ## The Numbers
 
 - **4-6 hours** of actual build time

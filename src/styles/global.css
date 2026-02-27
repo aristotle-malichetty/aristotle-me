@@ -217,6 +217,52 @@ body {
   color: var(--color-text-secondary-dark);
 }
 
+.prose table {
+  width: 100%;
+  margin: 1.5em 0;
+  font-size: 0.925rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--color-border-light);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.dark .prose table {
+  border-color: var(--color-border-dark);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.625em 0.875em;
+  border-bottom: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border-light);
+}
+
+.prose th:last-child,
+.prose td:last-child {
+  border-right: none;
+}
+
+.prose tr:last-child td {
+  border-bottom: none;
+}
+
+.dark .prose th,
+.dark .prose td {
+  border-color: var(--color-border-dark);
+}
+
+.prose th {
+  font-weight: 600;
+  background-color: var(--color-card-light);
+}
+
+.dark .prose th {
+  background-color: var(--color-card-dark);
+}
+
 .prose img {
   border-radius: 0.75rem;
   margin: 2em 0;
