@@ -172,6 +172,14 @@ The first version was bland. Blue rectangle, white text, an "AM" circle in the c
 - Added a subtle gradient instead of flat blue
 - Anchored the content to the bottom so the reading flow goes brand → title → description
 
+**Before:**
+
+![The first version — flat blue, generic AM circle, no description. Looks like every other auto-generated OG image.](../../assets/images/blog/og-image-before.jpg)
+
+**After:**
+
+![The final version — gradient background, pixel art avatar as a byline, post description, content anchored to the bottom.](../../assets/images/blog/og-image-after.png)
+
 Small changes, but the difference between "auto-generated" and "intentional" is usually just a few design decisions.
 
 One thing that tripped me up: resvg uses native Node.js bindings, and Vite's bundler tried to process the `.node` file during the Cloudflare build. It crashed with "Unexpected character" errors on binary data. The fix was adding `@resvg/resvg-js` to `vite.ssr.external` in the Astro config so Rollup leaves it alone. Also, satori doesn't support woff2 fonts — Google Fonts serves woff2 by default to modern browsers. I had to fake an old IE User-Agent in the font fetch to get TTF format instead.
