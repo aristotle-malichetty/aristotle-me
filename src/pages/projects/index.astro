@@ -11,18 +11,22 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
 
 <BaseLayout
   title="Projects"
-  description="Things I've built — from SaaS products to developer tools."
+  description="Real tools for real problems — APIs, Chrome extensions, and products I've shipped."
 >
   <section class="py-16 sm:py-20">
     <div class="max-w-5xl mx-auto px-4 sm:px-6">
-      <div class="mb-12 stagger">
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-block w-8 h-[2px] bg-[var(--color-accent)]"></span>
+          <span class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)]">Portfolio</span>
+        </div>
         <h1 class="font-display text-4xl font-bold mb-4">Projects</h1>
         <p class="text-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] max-w-2xl">
-          Things I've built — from SaaS products to developer tools.
+          Real tools for real problems — APIs, Chrome extensions, and products I've shipped.
         </p>
       </div>
 
-      <div class="grid sm:grid-cols-2 gap-6 stagger">
+      <div class="grid sm:grid-cols-2 gap-5">
         {projects.map((project) => (
           <ProjectCard
             title={project.data.title}

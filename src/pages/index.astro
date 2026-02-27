@@ -6,7 +6,20 @@ import Hero from '@components/Hero.astro';
 import BlogCard from '@components/BlogCard.astro';
 import ProjectCard from '@components/ProjectCard.astro';
 import { getCollection } from 'astro:content';
-import { BarChart3, Rocket, Cpu, ArrowRight } from '@lucide/astro';
+import { ArrowRight, Quote } from '@lucide/astro';
+
+const testimonials = [
+  {
+    quote: 'He turns complex datasets into clear insights and builds automations that reduce manual work and improve efficiency. His work has directly supported our growth and operational improvements.',
+    name: 'Biswajit Pradhan',
+    role: 'CEO, Digital Domination',
+  },
+  {
+    quote: 'Aristotle consistently delivers thoughtful, data-driven solutions and explains complex ideas with clarity and balance. Strategic, reliable, and a strong contributor on cross-functional initiatives.',
+    name: 'Fernando Ortiz, HCCP',
+    role: 'Regional Manager, Equity Management Partners',
+  },
+];
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const latestPosts = allPosts
@@ -17,64 +30,32 @@ const allProjects = await getCollection('projects');
 const featuredProjects = allProjects
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 4);
-
-const pillars = [
-  {
-    icon: BarChart3,
-    title: 'Marketing Analytics',
-    description: 'GA4, Looker Studio, BigQuery — turning raw data into actionable insights and dashboards.',
-  },
-  {
-    icon: Rocket,
-    title: 'SaaS Builder',
-    description: 'Designing and shipping products from idea to launch using modern web frameworks.',
-  },
-  {
-    icon: Cpu,
-    title: 'AI-Powered Development',
-    description: 'Leveraging Claude, Cursor, and automation to build faster and smarter.',
-  },
-];
 ---
 
 <BaseLayout
   title="aristotle.me"
-  description="Aris Malichetty — Marketing Analyst, SaaS Builder, and AI-Powered Developer."
+  description="Aris Malichetty — marketing analyst, product builder, and developer who builds with AI."
 >
   <Hero />
 
-  <!-- What I Do -->
-  <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6">
-      <h2 class="font-display text-2xl font-bold mb-10">What I Do</h2>
-      <div class="grid sm:grid-cols-3 gap-6 stagger">
-        {pillars.map(({ icon: Icon, title, description }) => (
-          <div class="p-6 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
-            <Icon class="w-8 h-8 text-[var(--color-accent)] mb-4" />
-            <h3 class="font-display text-lg font-semibold mb-2">{title}</h3>
-            <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">
-              {description}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
   <!-- Latest Posts -->
   {latestPosts.length > 0 && (
-    <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+    <section class="py-20 sm:py-24 section-alt">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
-        <div class="flex items-center justify-between mb-10">
-          <h2 class="font-display text-2xl font-bold">Latest Posts</h2>
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">From the blog</p>
+            <h2 class="font-display text-2xl sm:text-3xl font-bold">Latest Posts</h2>
+          </div>
           <a
             href="/blog"
-            class="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
+            class="group hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
           >
-            View all <ArrowRight class="w-4 h-4" />
+            View all
+            <ArrowRight class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
           </a>
         </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 stagger">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {latestPosts.map((post) => (
             <BlogCard
               slug={post.id}
@@ -85,24 +66,36 @@ const pillars = [
             />
           ))}
         </div>
+        <div class="mt-6 sm:hidden text-center">
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)]"
+          >
+            View all posts <ArrowRight class="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
     </section>
   )}
 
   <!-- Featured Projects -->
   {featuredProjects.length > 0 && (
-    <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+    <section class="py-20 sm:py-24">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
-        <div class="flex items-center justify-between mb-10">
-          <h2 class="font-display text-2xl font-bold">Projects</h2>
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">Things I've built</p>
+            <h2 class="font-display text-2xl sm:text-3xl font-bold">Projects</h2>
+          </div>
           <a
             href="/projects"
-            class="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] hover:underline"
+            class="group hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
           >
-            View all <ArrowRight class="w-4 h-4" />
+            View all
+            <ArrowRight class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
           </a>
         </div>
-        <div class="grid sm:grid-cols-2 gap-6 stagger">
+        <div class="grid sm:grid-cols-2 gap-5">
           {featuredProjects.map((project) => (
             <ProjectCard
               title={project.data.title}
@@ -114,24 +107,69 @@ const pillars = [
             />
           ))}
         </div>
+        <div class="mt-6 sm:hidden text-center">
+          <a
+            href="/projects"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)]"
+          >
+            View all projects <ArrowRight class="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
     </section>
   )}
 
+  <!-- Testimonials -->
+  <section class="py-20 sm:py-24 section-alt">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12">
+        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">What people say</p>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold mb-3">Trusted by 40+ clients</h2>
+        <div class="flex items-center justify-center gap-1">
+          {[...Array(5)].map(() => (
+            <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+          ))}
+          <span class="ml-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">25+ reviews</span>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        {testimonials.map(({ quote, name, role }) => (
+          <div class="relative p-6 sm:p-8 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+            <Quote class="w-8 h-8 text-[var(--color-accent)]/20 absolute top-6 right-6" />
+            <p class="text-sm sm:text-[15px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-6 relative">
+              "{quote}"
+            </p>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
+                <span class="text-xs font-bold text-[var(--color-accent)]">{name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold">{name}</p>
+                <p class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{role}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
-  <section class="py-20 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
-      <h2 class="font-display text-3xl font-bold mb-4">Let's build something</h2>
-      <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] max-w-lg mx-auto mb-8">
-        Have an idea, a project, or just want to chat about data and AI? I'd love to hear from you.
-      </p>
-      <a
-        href="/contact"
-        class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
-      >
-        Get in Touch
-        <ArrowRight class="w-4 h-4" />
-      </a>
+  <section class="py-20 sm:py-24">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="max-w-xl mx-auto text-center">
+        <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Let's build something</h2>
+        <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8 leading-relaxed">
+          Have a project in mind — or a problem that needs solving? Let's talk.
+        </p>
+        <a
+          href="/contact"
+          class="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-all duration-200"
+        >
+          Get in Touch
+          <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+        </a>
+      </div>
     </div>
   </section>
 </BaseLayout>

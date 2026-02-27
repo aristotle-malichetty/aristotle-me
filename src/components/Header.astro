@@ -25,16 +25,19 @@ const currentPath = Astro.url.pathname;
         <a
           href={href}
           class:list={[
-            'px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+            'relative px-3 py-2 text-sm font-medium transition-colors',
             currentPath.startsWith(href)
-              ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/10'
-              : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-text-primary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)]',
+              ? 'text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]'
+              : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-text-primary-dark)]',
           ]}
         >
           {label}
+          {currentPath.startsWith(href) && (
+            <span class="absolute bottom-0 left-3 right-3 h-[2px] bg-[var(--color-accent)] rounded-full"></span>
+          )}
         </a>
       ))}
-      <div class="ml-2">
+      <div class="ml-3 pl-3 border-l border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
         <ThemeToggle />
       </div>
     </div>

@@ -2,85 +2,187 @@
 export const prerender = true;
 
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { Code, Database, Brain, Rocket } from '@lucide/astro';
+import { Rocket, BarChart3, Brain, Newspaper, ShoppingBag, Cpu } from '@lucide/astro';
+
+const clients = [
+  { name: 'ILOLA', href: 'https://ilolas.com/' },
+  { name: 'Digital Domination', href: 'https://www.digitaldomination.io/' },
+  { name: 'Full Feedings', href: 'https://fullfeedings.com/' },
+  { name: 'Imaging Director', href: 'https://www.imagingdirector.net/' },
+  { name: 'Equity Management Partners', href: 'https://equitymanagementonline.com/' },
+];
+
+const whatIDo = [
+  {
+    icon: BarChart3,
+    title: 'Analytics & Dashboards',
+    description: 'I turn raw data into dashboards teams actually use — and decisions that move the needle.',
+  },
+  {
+    icon: Rocket,
+    title: 'Product Builder',
+    description: 'From PRDs to production — APIs, automation tools, and full-stack apps that solve real problems.',
+  },
+  {
+    icon: Cpu,
+    title: 'AI + Automation',
+    description: 'I build with AI every day — not as a gimmick, but because it lets me ship faster and think bigger.',
+  },
+];
 
 const workingOn = [
   {
     icon: Rocket,
-    title: 'CallClaim.io',
-    description: 'A SaaS platform for tracking and managing insurance claim calls.',
+    title: 'A Consumer SaaS Product',
+    description: 'Building an end-to-end product from scratch — payments, auth, email, file storage. The full stack, the full challenge.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Client Analytics & Growth Strategy',
+    description: 'Dashboards, marketing analytics, and growth strategy for SaaS, e-commerce, and creator marketplace brands.',
+  },
+  {
+    icon: Newspaper,
+    title: 'A Medical Newsletter (20K+ Readers & Growing)',
+    description: 'Go-to-market strategy, lead generation for readers and advertisers, automation, and subscriber management.',
   },
   {
     icon: Brain,
-    title: 'AI-Powered Workflows',
-    description: 'Building automation pipelines with Claude, APIs, and serverless functions.',
-  },
-  {
-    icon: Database,
-    title: 'Marketing Analytics',
-    description: 'Consulting on GA4, Looker Studio, and BigQuery implementations for clients.',
+    title: 'Open-Source Tools',
+    description: 'APIs, Chrome extensions, and developer utilities — solving real problems and sharing them publicly.',
   },
 ];
 
-const techStack = [
-  'Astro', 'React', 'Next.js', 'Tailwind CSS', 'TypeScript',
-  'Python', 'SQL', 'BigQuery', 'Cloudflare Workers',
-  'GA4', 'Looker Studio', 'Claude AI', 'Cursor',
+const techStackGroups = [
+  {
+    label: 'Analytics & BI',
+    skills: ['GA4', 'Looker Studio', 'Power BI', 'BigQuery', 'SQL', 'A/B Testing'],
+  },
+  {
+    label: 'Marketing & Sales',
+    skills: ['HubSpot', 'Salesforce CRM', 'Apollo', 'Clay', 'Instantly', 'Smartlead'],
+  },
+  {
+    label: 'Development',
+    skills: ['React', 'Node.js', 'Astro', 'Python', 'REST APIs', 'Supabase', 'Clerk'],
+  },
+  {
+    label: 'Infrastructure',
+    skills: ['Cloudflare Pages', 'Cloudflare Workers', 'Cloudflare D1', 'Cloudflare R2'],
+  },
+  {
+    label: 'AI & Automation',
+    skills: ['Claude Code', 'Cursor', 'Zapier', 'n8n', 'PRDs'],
+  },
 ];
 ---
 
 <BaseLayout
   title="About"
-  description="I'm Aris — a marketing analyst turned builder. Learn more about my background, what I'm working on, and my tech stack."
+  description="I'm Aris — I see how things should work, then I build them. Business analytics, marketing, APIs, and AI."
 >
   <section class="py-16 sm:py-20">
     <div class="max-w-3xl mx-auto px-4 sm:px-6">
       <div class="stagger">
-        <h1 class="font-display text-4xl font-bold mb-8">About</h1>
+        <div class="mb-12">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="inline-block w-8 h-[2px] bg-[var(--color-accent)]"></span>
+            <span class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)]">About</span>
+          </div>
+          <h1 class="font-display text-4xl font-bold mb-8">I see how things should work — then I build them.</h1>
 
-        <!-- Bio -->
-        <div class="space-y-4 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-14">
-          <p>
-            I'm <strong class="text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]">Aristotle Malichetty</strong> — most people call me Aris. I'm a marketing analyst who fell in love with building things.
-          </p>
-          <p>
-            My background is in digital marketing analytics — I've spent 3+ years helping companies understand their data through GA4, Looker Studio, and BigQuery. I've built dashboards for healthcare, e-commerce, and SaaS clients, and I've seen firsthand how good data can transform a business.
-          </p>
-          <p>
-            But analytics is just half the story. I'm also a builder. I use AI tools like Claude and Cursor to rapidly prototype and ship products — from SaaS platforms to developer utilities. I believe the best analysts don't just report on data; they build the tools that generate it.
-          </p>
-          <p>
-            I hold an M.S. in Business Analytics from the University of New Haven and a B.Sc. in Mathematics & Computer Science. When I'm not building, you'll find me exploring new AI tools, writing about the intersection of data and code, or working on my next project idea.
-          </p>
-        </div>
-
-        <!-- What I'm Working On -->
-        <div class="mb-14">
-          <h2 class="font-display text-2xl font-bold mb-6">What I'm Working On</h2>
-          <div class="space-y-4">
-            {workingOn.map(({ icon: Icon, title, description }) => (
-              <div class="flex gap-4 p-4 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
-                <Icon class="w-6 h-6 text-[var(--color-accent)] shrink-0 mt-0.5" />
-                <div>
-                  <h3 class="font-display font-semibold mb-1">{title}</h3>
-                  <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{description}</p>
-                </div>
-              </div>
-            ))}
+          <!-- Bio -->
+          <div class="space-y-4 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">
+            <p>
+              I'm <strong class="text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]">Aristotle Malichetty</strong> — most people call me Aris. My background is in marketing and business analytics — I've spent 3+ years helping companies with go-to-market strategy, lead generation, analytics, and dashboards.
+            </p>
+            <p>
+              These days I spend most of my time coding. I use <strong class="text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]">Claude Code</strong> and <strong class="text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]">Cursor</strong> every day to build software — APIs, automation tools, Chrome extensions, full-stack apps. I enjoy the entire cycle: writing PRDs, designing systems, shipping code, and watching people use what I built.
+            </p>
+            <p>
+              I hold an M.S. in Business Analytics from the University of New Haven and a B.Sc. in Mathematics & Computer Science. I'm somewhere between a business analyst and a software engineer — and I like it that way.
+            </p>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Tech Stack -->
-        <div>
-          <h2 class="font-display text-2xl font-bold mb-6">Tech Stack</h2>
-          <div class="flex flex-wrap gap-2">
-            {techStack.map((tech) => (
-              <span class="inline-block px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
-                {tech}
-              </span>
-            ))}
+  <!-- What I Do -->
+  <section class="py-16 sm:py-20 section-alt">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <h2 class="font-display text-2xl font-bold mb-8">What I Do</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        {whatIDo.map(({ icon: Icon, title, description }) => (
+          <div class="p-5 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+            <div class="w-10 h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center mb-4">
+              <Icon class="w-5 h-5 text-[var(--color-accent)]" />
+            </div>
+            <h3 class="font-display font-semibold mb-1.5">{title}</h3>
+            <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">{description}</p>
           </div>
-        </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Worked With -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <h2 class="font-display text-2xl font-bold mb-2">Worked With</h2>
+      <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8">40+ clients across healthcare, e-commerce, SaaS, and creator economy.</p>
+      <div class="flex flex-wrap gap-3">
+        {clients.map(({ name, href }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-all duration-200"
+          >
+            {name}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- What I'm Working On -->
+  <section class="py-16 sm:py-20 section-alt">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <h2 class="font-display text-2xl font-bold mb-8">What I'm Working On</h2>
+      <div class="space-y-3">
+        {workingOn.map(({ icon: Icon, title, description }) => (
+          <div class="flex gap-4 p-4 sm:p-5 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+            <div class="w-10 h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <Icon class="w-5 h-5 text-[var(--color-accent)]" />
+            </div>
+            <div>
+              <h3 class="font-display font-semibold mb-1">{title}</h3>
+              <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">{description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools & Tech -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <h2 class="font-display text-2xl font-bold mb-8">Tools & Tech</h2>
+      <div class="space-y-6">
+        {techStackGroups.map((group) => (
+          <div>
+            <h3 class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-3">{group.label}</h3>
+            <div class="flex flex-wrap gap-2">
+              {group.skills.map((skill) => (
+                <span class="inline-block px-3 py-1.5 text-sm font-medium rounded-lg border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   </section>
