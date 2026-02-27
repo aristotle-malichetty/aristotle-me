@@ -1,43 +1,62 @@
-# Astro Starter Kit: Minimal
+# aristotle.me
+
+Personal website and blog for Aris Malichetty — marketing analyst, product builder, and developer who builds with AI.
+
+**Live:** [aristotle.me](https://aristotle.me)
+
+## Tech Stack
+
+| Layer | Tool |
+|-------|------|
+| Framework | Astro 5 (server mode) |
+| CMS | Keystatic (local, file-based) |
+| Styling | Tailwind CSS 4 |
+| Fonts | Bricolage Grotesque (display), DM Sans (body), JetBrains Mono (code) |
+| Icons | Lucide |
+| Hosting | Cloudflare Pages + Workers |
+| Database | Cloudflare D1 (blog comments) |
+
+## Getting Started
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Dev server runs at `localhost:4321`. Keystatic admin UI is at `localhost:4321/keystatic`.
 
-## 🚀 Project Structure
+## Scripts
 
-Inside of your Astro project, you'll see the following folders and files:
+| Command | Action |
+|---------|--------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build locally |
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+## Project Structure
+
+```
+src/
+├── components/     # Astro components (Header, Footer, Hero, cards, etc.)
+├── content/        # Markdoc content managed by Keystatic
+│   ├── blog/       # Blog posts (.mdoc)
+│   └── projects/   # Project entries (.mdoc)
+├── layouts/        # BaseLayout wrapper
+├── pages/          # File-based routing
+│   ├── api/        # API routes (comments)
+│   ├── blog/       # Blog listing + individual posts
+│   └── projects/   # Projects listing
+├── styles/         # Global CSS + Tailwind
+└── utils/          # Helpers (comments)
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Content
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Content is managed via Keystatic at `/keystatic` in dev mode. Blog posts and projects are stored as `.mdoc` (Markdoc) files in `src/content/`.
 
-Any static assets, like images, can be placed in the `public/` directory.
+- **Blog posts** have: title, description, date, tags, draft flag, featured flag
+- **Projects** have: title, description, URLs, tags, status (live/building/idea), sort order
 
-## 🧞 Commands
+## Deployment
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Pushes to `main` auto-deploy to Cloudflare Pages. The site uses Cloudflare Workers for server-side routes (comments API) and D1 for the comments database.

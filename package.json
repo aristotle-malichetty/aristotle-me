@@ -6,8 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "postinstall": "git config core.hooksPath .githooks"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
