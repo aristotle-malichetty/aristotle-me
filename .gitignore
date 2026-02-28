@@ -30,6 +30,9 @@ pnpm-debug.log*
 # playwright MCP logs
 .playwright-mcp/
 
+# MCP config
+.mcp.json
+
 # wrangler
 .wrangler/
 
