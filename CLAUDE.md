@@ -4,6 +4,10 @@
 
 aristotle.me — personal website and blog for Aris Malichetty. Astro 5 + Keystatic CMS + Tailwind CSS 4, deployed on Cloudflare Pages.
 
+## Voice Profile
+
+@.claude/skills/blog-writing/references/voice-profile.md
+
 ## Commands
 
 - `npm run dev` — start dev server (localhost:4321)
@@ -55,6 +59,7 @@ aristotle.me — personal website and blog for Aris Malichetty. Astro 5 + Keysta
 - Reference point: the About page headline "I see how things should work — then I build them."
 - No fluff, no jargon, no resume-speak
 - Outcome-focused descriptions (what it does for people, not just what tech it uses)
+
 
 ## Git
 
