@@ -1,6 +1,6 @@
 ---
-title: How I Built aristotle.me (And Everything That Went Wrong)
-description: I built my personal site in about 5–6 hours with Claude Code. Here's every decision, every problem, and every fix.
+title: I Built aristotle.me in 6 Hours. Here's Every Mistake I Made.
+description: I almost shipped an XSS vulnerability on day one. Here's every decision, mistake, and deleted feature from building aristotle.me with Claude Code.
 date: 2026-02-27
 tags:
   - Web Development
@@ -10,143 +10,175 @@ tags:
 featured: true
 ---
 
-I built this site from scratch in about 5–6 hours. Not "from a template" scratch — from `npm create astro@latest` scratch. Here's what actually happened.
+I almost shipped a security vulnerability on day one.
 
-## From Spec to Scaffold
+The comment system worked. Threaded replies, real-time loading, Cloudflare D1 for storage. Everything looked great. Then I realized I was injecting user input straight into `innerHTML` without escaping it.
 
-I wrote about the full decision journey — why WordPress wasn't working, the tools I considered, and how I landed on Astro + Keystatic + Cloudflare — in a [separate post](/blog/why-i-moved-away-from-wordpress). Go read that one first if you want the backstory.
+If someone typed `<script>alert('hi')</script>` as their name, it would execute. Classic XSS. On a brand new site. Built with AI.
 
-The short version: I use Claude Code every day but never touched my WordPress dashboard. So I decided to rebuild the whole site in a stack I can manage from my terminal.
+That's the kind of stuff you don't see in "I built this in 6 hours" posts. So I'm going to show you all of it. The decisions, the mistakes, the things I built and then deleted.
 
-I didn't open my editor and start coding. I started in Claude chat (the conversation UI, not Claude Code) and talked through everything — what pages I need, what the content schemas should look like, design direction, deployment config. By the end of that conversation, Claude had given me a full product spec.
+Here's how aristotle.me actually came together.
 
-Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project — Astro setup, Keystatic config, all pages and components, SEO, Cloudflare deployment. The whole initial site came from that one spec. From there, I iterated on what was generated. That's where the real work started.
+## The Spec Came Before the Code
 
-![The build spec Claude generated — every page, every tool, every design decision laid out before writing a single line of code.](../../assets/images/blog/claude-build-spec.jpg)
+I wrote about why I left WordPress in a [separate post](/blog/why-i-moved-away-from-wordpress). Short version: I use Claude Code every day but never touched my WordPress dashboard. So I rebuilt the whole site in a stack I can manage from my terminal.
 
-## Git Init First, Always
+But I didn't just open my editor and start typing. I started in Claude's conversation UI (not Claude Code) and talked through everything first. What pages I need. What the content schemas should look like. Design direction. Deployment config.
 
-One of the best habits I picked up: initialize a git repo the moment the project exists, and commit after every meaningful change. Not at the end. Not when it's "ready." From the very first scaffold.
+By the end of that conversation, I had a full product spec.
 
-Two reasons this matters when you're building with Claude Code:
+Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project. Astro setup, Keystatic config, pages, components, SEO, Cloudflare deployment. All from one spec.
 
-1. **Context.** Claude Code can read your git history. When it sees what you've already done — what files changed, what the commit messages say — it makes better decisions about what to do next. Your commit history is basically a conversation log between you and your project.
+From there, I iterated. That's where the real work started.
 
-2. **Rollback.** If Claude Code makes a change that breaks something, you're one `git checkout` away from the last working state. No panic. No "undo" guessing. Just revert and try a different approach.
+![The build spec Claude generated. Every page, tool, and design decision mapped out before writing a single line of code.](../../assets/images/blog/claude-build-spec.jpg)
 
-I committed locally after every feature, every fix, every refactor. Not to push somewhere — just to save my progress. It costs nothing and it's saved me more than once.
+## Git Init First. Always.
 
-## The Blog Design
+If you're building with AI tools, this habit will save you.
 
-I wanted the blog to feel premium. Clean. Like reading something on Substack or Medium — not a developer's default markdown page.
+Initialize a git repo the moment the project exists. Commit after every meaningful change. Not at the end. Not when it's "ready." From the very first scaffold.
 
-I looked at how Substack handles their blog posts — reading time at the top, comment count, share buttons. I basically copied the layout: time to read, share icons (the share button style is almost straight from Substack), and a table of contents on the side that scrolls with the post and collapses when you click it.
+Two reasons.
+
+**Context.** Claude Code reads your git history. When it sees what you've already built, what files changed, what the commit messages say, it makes better decisions about what to do next. Your commit history is basically a conversation log between you and your project.
+
+**Rollback.** Claude Code makes a change that breaks something? You're one `git checkout` away from the last working state. No panic. No guessing. Just revert and try again.
+
+I committed locally after every feature, every fix, every refactor. Not to push anywhere. Just to save my progress. It costs nothing and it's saved me more than once.
+
+## I Basically Copied Substack's Blog Layout
+
+I wanted the blog to feel premium. Clean. Like reading something on Substack or Medium. Not a developer's default markdown page.
+
+So I studied how Substack does it. Reading time at the top, comment count, share buttons. I took that structure and ran with it. Time to read, share icons (almost straight from Substack), and a table of contents on the side that scrolls with you and collapses when you click it.
 
 **My site:**
 
-![The aristotle.me blog layout — byline, reading time, collapsible table of contents. Heavily inspired by Substack.](../../assets/images/blog/blog-layout-aristotle.png)
+![The aristotle.me blog layout. Byline, reading time, collapsible table of contents. Heavily inspired by Substack.](../../assets/images/blog/blog-layout-aristotle.png)
 
 **Substack:**
 
-![A typical Substack post for comparison — same structure: title, subtitle, author row, engagement bar, sticky TOC on the left.](../../assets/images/blog/blog-layout-substack.png)
+![A typical Substack post for comparison. Same structure: title, subtitle, author row, engagement bar, sticky TOC on the left.](../../assets/images/blog/blog-layout-substack.png)
 
-The goal was simple: make it feel like a real publication, not a side project.
+The goal: make it feel like a real blog. Not a side project.
 
-### Mobile TOC
+### The Mobile TOC Problem
 
-The desktop TOC works great — sticky sidebar, collapse toggle, active section highlighting. But it only shows at 1280px and above. On mobile, readers just scroll. For a post with 15 sections, that's a lot of blind scrolling.
+Desktop TOC works great. Sticky sidebar, collapse toggle, active section highlighting. But it only shows at 1280px and above. On mobile, you just scroll. For a post with 15 sections, that's a lot of blind scrolling.
 
-I added a floating button in the bottom-right corner that opens a bottom sheet with the full section list. Tap a section, it smooth scrolls there and the sheet closes. The same IntersectionObserver that highlights the active section in the desktop TOC highlights it in the mobile sheet too — both use the same `data-toc-link` attributes, so one observer drives both.
+I added a floating button in the bottom-right corner. Tap it, a bottom sheet opens with the full section list. Tap a section, it smooth scrolls there, sheet closes.
 
-The annoying part was `overflow-x: clip` on `html`. I'd added it earlier to prevent the desktop TOC from causing horizontal scroll (it's positioned outside the content area). But `clip` on `html` also clips `position: fixed` elements — so the floating button was half-visible, cut off at the edge. Moving `overflow-x: clip` to `body` instead fixed it. Still prevents the TOC scrollbar, doesn't clip fixed elements.
+The same IntersectionObserver that drives the desktop TOC drives the mobile one. Both use the same `data-toc-link` attributes. One observer, two UIs.
 
-## Building the Comment System
+Here's the annoying part. I'd set `overflow-x: clip` on `html` earlier to stop the desktop TOC from causing horizontal scroll. But `clip` on `html` also clips `position: fixed` elements. So the floating button was half-visible, cut off at the edge.
 
-I wanted comments. Claude Code gave me three options:
+Moving `overflow-x: clip` to `body` fixed it. Small CSS bug. Took way too long to find.
 
-1. **Giscus** — powered by GitHub Discussions. Free, open source.
-2. **Cusdis** — lightweight, open source comment system.
-3. **Build your own** — Cloudflare D1 (SQLite) + Workers. Full control.
+## Building My Own Comment System
 
-I rejected Giscus immediately. Readers would need a GitHub account to comment on my blog post. Most of my visitors aren't developers — that's too much friction.
+I wanted comments. Claude Code gave me three options.
 
-I tried to check out Cusdis, but the website wouldn't even load for me (probably my ad blocker). Not a great sign for a tool I'd depend on.
+**Giscus.** Powered by GitHub Discussions. Free, open source. But readers need a GitHub account to comment. Most of my visitors aren't developers. Too much friction. Rejected immediately.
 
-I'd been working with Cloudflare D1 on a couple of other projects already, so I had experience with it. And Cloudflare's Turnstile (their free invisible CAPTCHA) handles bot protection really well. So I went with option 3: build my own.
+**Cusdis.** Lightweight, open source. I tried to check out their site and it wouldn't even load. Probably my ad blocker. Not a great sign for a tool I'd depend on.
 
-The setup:
-- **Cloudflare D1** for storage
-- **Cloudflare Turnstile** for spam protection
-- Honeypot fields that bots fill out and humans never see
-- Rate limiting: 5 comments per 10 minutes per IP
-- Content-based spam filtering
-- Threaded replies
+**Build my own.** Cloudflare D1 (SQLite) + Workers. Full control.
 
-### The Reply UX Problem
+I'd already used D1 on other projects, so I knew how it worked. And Cloudflare's Turnstile (their free invisible CAPTCHA) handles bot protection well. So I built my own.
 
-When I first built the reply system, clicking "Reply" on a comment scrolled you back up to the main comment form at the top. It showed "Replying to [name]" but you were now at the top of the page, away from the conversation. Bad UX.
+The setup: D1 for storage, Turnstile for spam protection, honeypot fields that bots fill out and humans never see. Plus rate limiting at 5 comments per 10 minutes per IP, content-based spam filtering, and threaded replies.
 
-So I rebuilt it. Now when you click "Reply," an inline form appears right below that comment — name field, text field, submit button. You stay in context. You can see the comment you're replying to. Much better.
+### The Reply UX I Got Wrong
 
-### The Turnstile Headache
+First version: you click "Reply" on a comment, it scrolls you all the way back up to the main form at the top. Shows "Replying to [name]" but now you're at the top of the page. Away from the conversation you were reading.
 
-Each comment form needs its own Turnstile widget for bot protection. The main form has one. When someone clicks "Reply," a second Turnstile widget renders inline in the reply form.
+Bad UX.
 
-Managing two Turnstile instances on the same page — initializing them, resetting them after submission, cleaning them up when the reply form closes — was more annoying than the actual comment storage logic. It works, but it was the most frustrating part of the whole build.
+I rebuilt it. Now clicking "Reply" opens an inline form right below that comment. Name field, text field, submit button. You stay in context. You can see what you're replying to.
 
-![The comment system — Turnstile widget, threaded replies, inline reply form. More work than it looks.](../../assets/images/blog/comment-system.png)
+Much better.
+
+### Two Turnstile Widgets on One Page
+
+Each comment form needs its own Turnstile widget. The main form has one. When someone clicks "Reply," a second widget renders in the inline reply form.
+
+Managing two Turnstile instances on the same page was more annoying than building the comment storage itself. Initializing them, resetting after submission, cleaning up when the reply form closes. It works. But it was the most frustrating part of the entire build.
+
+![The comment system. Turnstile widget, threaded replies, inline reply form. More work than it looks.](../../assets/images/blog/comment-system.png)
 
 ## The XSS I Almost Shipped
 
-This one stung.
+I mentioned this at the top. Here's the full story.
 
-The comment system worked great. Threaded replies, real-time loading, everything. Then I looked closer at the reply flow and realized I was inserting user-generated content into `innerHTML` **without escaping it**.
+The comment form takes a name and a message. I was putting that text directly into the page without cleaning it first. No filtering. So if someone types actual code instead of their name, the browser doesn't know the difference. It treats it as part of the website and runs it.
 
-If someone typed `<script>alert('hi')</script>` as their name, it would execute. Classic XSS.
+For a random visitor reading my blog, the damage is limited. They don't have accounts on my site. No login sessions. But someone could still redirect them to a phishing page, inject fake content, or run a crypto miner in their browser.
 
-The fix was simple — an `escapeHtml()` function that converts `<`, `>`, `"`, `'`, and `&` to their HTML entities. Applied it everywhere user content touches the DOM. But the lesson was real: it's easy to miss when you're moving fast and the feature "works."
+The real risk was me. I use Keystatic with GitHub OAuth to manage this site. If I'm logged in and view a malicious comment, that script runs in my browser with my auth tokens. Someone could grab my GitHub token, push code to my repo, and since Cloudflare auto-deploys from GitHub, they'd own my entire site. Through my own comment section.
 
-## Fixing the Design with Playwright MCP
+The fix took two minutes. A small function that converts special characters into safe text before displaying them. Applied it everywhere user content touches the page.
 
-After building everything, I installed the **Playwright MCP** into my Claude Code workflow so it could actually see and verify the UI — not just the code, but how it looks in a real browser.
+But here's the lesson. When you build with AI, the code comes fast. Really fast. It's easy to trust it because it "works." You still have to check what happens when real people type things you didn't expect. AI tools are fast. They're not infallible.
 
-I told it to go through the whole site and tell me what could be improved. Honestly, the initial design was plain. Functional but bland. Claude Code came back with suggestions — a warmer color palette, better card elevations, the white-and-cement color pattern you see now. It looked significantly better after that pass.
+## The Design Was Ugly (Until Playwright MCP Fixed It)
 
-I also pulled two recommendations from my LinkedIn and added them as testimonials. The original reviews were long — nobody reads a full paragraph from a stranger. So I trimmed them down to the strongest two sentences each.
+After building everything, I installed Playwright MCP into my Claude Code workflow. This lets Claude Code actually *see* the UI in a real browser. Not just the code. The actual rendered page.
 
-## Things I Built and Then Removed
+I told it to go through the whole site and tell me what could be improved.
 
-**The resume page.** I built a full resume page, then deleted it. Nowadays every job requires a customized resume — having a generic one on my website doesn't make sense. LinkedIn already serves that purpose. I replaced it with an About section instead: what I'm working on, who I've worked with, what I do, and the tools I use.
+The initial design was plain. Functional but bland. Claude Code came back with suggestions. Warmer color palette, better card elevations, the white-and-cement color pattern you see now. The site looked significantly better after that one pass.
 
-**The pre-commit hook.** I was worried about accidentally publishing draft blog posts, so I built a git hook that scans every staged file for `draft: true` and blocks the commit. Then I realized the code already filters out drafts — they never show on the live site regardless. And if I ever use Keystatic from a browser, drafts need to be in the repo for the CMS to see them. The hook would break that. Removed it two commits later.
+I also pulled two recommendations from LinkedIn and added them as testimonials. The original reviews were long. Nobody reads a full paragraph from a stranger. So I trimmed them to the strongest two sentences each.
 
-Lesson from both: knowing when to cut something is just as important as knowing how to build it.
+## Things I Built and Then Deleted
 
-## The Copywriting Pass
+**The resume page.** Built a full resume page, then killed it. Every job wants a customized resume now. A generic one on your website doesn't help anyone. LinkedIn already does that job. I replaced it with an About section instead.
 
-This surprised me. After the whole build was done, I asked Claude Code to review the copywriting across the entire site. Not the code — the words.
+**The pre-commit hook.** I was worried about accidentally publishing draft blog posts. So I built a git hook that scans staged files for `draft: true` and blocks the commit.
 
-My homepage hero said: *"I do marketing, analytics, AI, automation, and product dev — basically anything that lets me avoid a boring day."*
+Then I realized the code already filters out drafts. They never show on the live site regardless. And if I ever use Keystatic from a browser, drafts need to be in the repo for the CMS to see them. The hook would break that.
 
-Meanwhile my About page said: *"I see how things should work — then I build them."*
+Removed it two commits later.
 
-The About page was carrying the whole site while the homepage — the first thing anyone reads — sounded like a LinkedIn headline. I rewrote everything in one pass. Trimmed testimonials, de-duplicated taglines, tightened every description.
+Both times, the right move was deleting what I just built. That's harder than it sounds.
 
-Zero functionality changed. More impact than any technical feature I shipped.
+## The Words Mattered More Than the Code
 
-## The Image Optimization Rabbit Hole
+This surprised me. After the whole build was done, I asked Claude Code to review the copy across the site. Not the code. The words.
 
-After publishing, I opened DevTools and looked at the network tab. The blog post images — screenshots of layouts, the comment system, the build spec — were loading as raw PNGs and JPGs straight from the `public/` folder. No compression, no responsive sizing, no WebP. One screenshot was 1.4MB. For a site that's supposed to be fast, that's embarrassing.
+My homepage hero said: *"I do marketing, analytics, AI, automation, and product dev. Basically anything that lets me avoid a boring day."*
 
-Astro has a built-in `<Image>` component that handles all of this — WebP conversion, responsive `srcset`, lazy loading, layout shift prevention. But it only works on images that go through Vite's build pipeline, which means they need to live in `src/`, not `public/`.
+Meanwhile my About page said: *"I see how things should work. Then I build them."*
 
-I told Claude Code to figure out how to wire this up. It entered plan mode, read through the Astro and Markdoc docs, explored the codebase, and came back with an 8-step plan. The tricky part wasn't moving files around — it was making Markdoc's image rendering use Astro's `<Image>` component instead of plain `<img>` tags, and making sure Keystatic's image uploads would still land in the right place with the right relative paths.
+See the gap?
 
-The fix touched eight files: a custom Markdoc image node, an Astro component with a fallback for external URLs, updated content schemas, Keystatic config changes, and the blog post template. Claude Code built the whole thing, ran the build, and confirmed it worked.
+The About page was carrying the whole site. The homepage, the first thing anyone reads, sounded like a LinkedIn headline.
 
-The results speak for themselves:
+I rewrote everything in one pass. Trimmed testimonials. De-duplicated taglines. Tightened every description.
 
-| Image | Original | WebP (480w) | WebP (1024w) | Reduction |
+Zero code changed. More impact than any technical feature I shipped.
+
+## 3.1MB of Images on a "Fast" Site
+
+After publishing, I opened DevTools. Checked the network tab.
+
+The blog images were loading as raw PNGs and JPGs from the `public/` folder. No compression. No responsive sizing. No WebP. One screenshot was 1.4MB.
+
+For a site that's supposed to be fast, that's embarrassing.
+
+Astro has a built-in `<Image>` component that handles WebP conversion, responsive `srcset`, lazy loading, and layout shift prevention. But it only works on images that go through Vite's build pipeline. They need to live in `src/`, not `public/`.
+
+I told Claude Code to fix this. It entered plan mode, read the Astro and Markdoc docs, explored the codebase, and came back with an 8-step plan.
+
+The tricky part wasn't moving files around. It was making Markdoc's image rendering use Astro's `<Image>` component instead of plain `<img>` tags. And keeping Keystatic's image uploads working with the right relative paths.
+
+The fix touched eight files. Custom Markdoc image node, Astro component with external URL fallback, updated content schemas, Keystatic config changes, and the blog post template.
+
+Here's what happened to the file sizes:
+
+| Image | Before | After (480w) | After (1024w) | Reduction |
 |---|---|---|---|---|
 | blog-layout-substack.png | 1,468kB | 18kB | 124kB | 99% |
 | blog-layout-aristotle.png | 872kB | 19kB | 94kB | 98% |
@@ -154,70 +186,60 @@ The results speak for themselves:
 | comment-system.png | 264kB | 7kB | 24kB | 97% |
 | **Total** | **3,172kB** | **68kB** | **313kB** | |
 
-3.1MB of raw images down to 68kB on mobile. That 1.4MB Substack screenshot? 18kB.
+3.1MB down to 68kB on mobile. That 1.4MB Substack screenshot? 18kB.
 
-The lesson: the initial build is never done. The best improvements come from actually using the site and noticing what's slow, what's heavy, what doesn't feel right. And plan mode is perfect for this kind of work — you describe the problem, let Claude Code research the approach, review the plan, then execute.
+The initial build is never done. The best improvements come from actually using your site and noticing what's slow.
 
-## SEO and Social Share Images
+## SEO You Don't Notice Until It's Missing
 
-After the image optimization, I looked at what was still missing compared to a WordPress site with Rank Math. Turns out — a lot of small things.
+After fixing images, I compared my site to what WordPress + Rank Math gives you out of the box.
 
-No `twitter:creator` tag. No `article:modified_time`. No `og:locale`. No structured data beyond a basic BlogPosting schema. No breadcrumbs in Google results. And the biggest gap: no social share images. Every time someone shared a blog post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
+I was missing a lot. No `twitter:creator` tag. No `article:modified_time`. No structured data beyond basic BlogPosting. No breadcrumbs in Google results.
 
-WordPress plugins generate all of this automatically. When you move to a custom stack, you have to build it yourself.
+The biggest gap: no social share images. Every time someone shared a post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
 
-### Auto-Generated OG Images
+WordPress plugins generate all of this automatically. On a custom stack, you build it yourself.
 
-I didn't want to design a share image every time I publish a post. So I built a system that generates them at build time — every blog post gets its own branded 1200x630 PNG automatically.
+### OG Images That Don't Look Auto-Generated
 
-The stack: **satori** (converts JSX-like markup to SVG — the same engine behind Vercel's OG images) and **@resvg/resvg-js** (converts SVG to PNG). Both run at build time in Node.js, so they don't affect site performance at all. The images are static files by the time they hit Cloudflare.
+I didn't want to design a share image every time I publish. So I built a system that generates them at build time. Every post gets a branded 1200x630 PNG automatically.
 
-The first version was bland. Blue rectangle, white text, an "AM" circle in the corner. It looked like every other auto-generated OG image on the internet. So I iterated:
+The tools: **satori** (the same engine behind Vercel's OG images, converts markup to SVG) and **@resvg/resvg-js** (SVG to PNG). Both run at build time. They're static files by the time they hit Cloudflare.
 
-- Swapped the generic "AM" circle for my pixel art avatar
-- Added the post description below the title
-- Put the avatar next to "aristotle.me" as a unified byline at the top — instead of having them stranded on opposite corners
-- Added a subtle gradient instead of flat blue
-- Anchored the content to the bottom so the reading flow goes brand → title → description
+First version was bland. Blue rectangle, white text, "AM" circle in the corner. Looked like every other auto-generated OG image on the internet.
+
+So I iterated. Swapped in my pixel art avatar. Added the post description. Unified the branding. Added a gradient. Anchored content to the bottom.
 
 **Before:**
 
-![The first version — flat blue, generic AM circle, no description. Looks like every other auto-generated OG image.](../../assets/images/blog/og-image-before.jpg)
+![First version. Flat blue, generic AM circle, no description.](../../assets/images/blog/og-image-before.jpg)
 
 **After:**
 
-![The final version — gradient background, pixel art avatar as a byline, post description, content anchored to the bottom.](../../assets/images/blog/og-image-after.png)
+![Final version. Gradient background, pixel art avatar, post description, content anchored to the bottom.](../../assets/images/blog/og-image-after.png)
 
-Small changes, but the difference between "auto-generated" and "intentional" is usually just a few design decisions.
+The difference between "auto-generated" and "intentional" is usually just a few design decisions.
 
-One thing that tripped me up: resvg uses native Node.js bindings, and Vite's bundler tried to process the `.node` file during the Cloudflare build. It crashed with "Unexpected character" errors on binary data. The fix was adding `@resvg/resvg-js` to `vite.ssr.external` in the Astro config so Rollup leaves it alone. Also, satori doesn't support woff2 fonts — Google Fonts serves woff2 by default to modern browsers. I had to fake an old IE User-Agent in the font fetch to get TTF format instead.
+Btw, two things tripped me up here. Resvg uses native Node.js bindings, and Vite's bundler tried to process the `.node` file during the Cloudflare build. Crashed with "Unexpected character" errors. Fix: add `@resvg/resvg-js` to `vite.ssr.external` so Rollup leaves it alone.
 
-### The Rest of the SEO
+Also, satori doesn't support woff2 fonts. Google Fonts serves woff2 by default. I had to fake an old IE User-Agent in the font fetch to get TTF format instead. Weird hack. Works perfectly.
 
-Beyond OG images, I added:
+### Everything Else I Was Missing
 
-- **Twitter meta tags** — `twitter:site` and `twitter:creator` so posts link back to my account
-- **Article metadata** — `article:author` and `article:modified_time` for blog posts
-- **Person + WebSite JSON-LD** on the homepage — helps Google build Knowledge Panels
-- **BreadcrumbList JSON-LD** on blog posts — enables breadcrumb snippets in search results
-- **Enhanced BlogPosting schema** — added `image`, `wordCount`, `inLanguage`, `publisher`, and `mainEntityOfPage`
-- **RSS feed** — added author name and post categories/tags to each item
+Beyond OG images, I added Twitter meta tags so posts link back to my account, `article:modified_time` for blog posts, Person and WebSite JSON-LD on the homepage for Knowledge Panels, BreadcrumbList JSON-LD for breadcrumb snippets in search results, and enhanced BlogPosting schema with `image`, `wordCount`, and `publisher` fields. Fixed up the RSS feed with proper author and category info too.
 
-The share modal on blog posts also got an upgrade. It used to show a gradient placeholder when a post had no cover image. Now it shows the actual generated OG image — so what you see in the modal is exactly what people see when they click your shared link.
+The share modal also got an upgrade. It used to show a gradient placeholder when a post had no cover image. Now it shows the actual generated OG image. What you see in the modal is exactly what people see when they click your link.
 
-None of this changes how the site looks or feels. But it's the difference between showing up on social media as a bare URL and showing up as a branded card with your title, description, and avatar.
+None of this changes how the site looks. But it's the difference between a bare URL and a branded card when someone shares your post.
 
 ## The Numbers
 
-- **4-6 hours** of actual build time
-- **Sub-500ms page loads** on a global CDN
-- **$0/month** hosting cost
-- **0 plugins** beyond core Astro integrations
+6 hours of build time. Sub-500ms page loads on a global CDN. $0/month hosting. Zero plugins beyond core Astro integrations.
 
 The site is open source: [github.com/aristotlem/aristotle-me](https://github.com/aristotlem/aristotle-me)
 
 ---
 
-Building a personal site isn't hard. Building one you're actually proud of takes more iterations than you'd expect. The code was the easy part. The hard part was knowing what to say, what to cut, and when to stop.
+The code was the easy part. The hard part was knowing what to say, what to cut, and when to stop tweaking.
 
-Also, I got to watch some great UFC fights while it built. Speaking of which — I built a [UFC Fighter Quiz](/projects) that matches you to a real fighter based on your fighting style. Five questions, weighted style profiles, live stats from my UFC API. Go find your alter ego.
+I'm working on a few other things right now. Including a [UFC Fighter Quiz](/projects) that matches you to a real fighter based on your fighting style. Five questions, weighted style profiles, live stats from my UFC API. Go find your alter ego.
