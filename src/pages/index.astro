@@ -29,7 +29,7 @@ const latestPosts = allPosts
 const allProjects = await getCollection('projects');
 const featuredProjects = allProjects
   .sort((a, b) => a.data.order - b.data.order)
-  .slice(0, 4);
+  .slice(0, 3);
 const personLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -52,7 +52,7 @@ const websiteLd = {
 ---
 
 <BaseLayout
-  title="aristotle.me - Analytics, Products, and AI"
+  title="aristotle.me"
   description="Aris Malichetty — marketing analyst, product builder, and developer who builds with AI."
 >
   <Hero />
@@ -60,7 +60,7 @@ const websiteLd = {
   <!-- Latest Posts -->
   {latestPosts.length > 0 && (
     <section class="py-20 sm:py-24 section-alt">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-end justify-between mb-10">
           <div>
             <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">From the blog</p>
@@ -100,7 +100,7 @@ const websiteLd = {
   <!-- Featured Projects -->
   {featuredProjects.length > 0 && (
     <section class="py-20 sm:py-24">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-end justify-between mb-10">
           <div>
             <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">Things I've built</p>
@@ -114,7 +114,7 @@ const websiteLd = {
             <ArrowRight class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
           </a>
         </div>
-        <div class="grid sm:grid-cols-2 gap-5">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {featuredProjects.map((project) => (
             <ProjectCard
               title={project.data.title}
@@ -140,7 +140,7 @@ const websiteLd = {
 
   <!-- Testimonials -->
   <section class="py-20 sm:py-24 section-alt">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-12">
         <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">What people say</p>
         <h2 class="font-display text-2xl sm:text-3xl font-bold mb-3">Trusted by 40+ clients</h2>
@@ -156,7 +156,7 @@ const websiteLd = {
           <div class="relative p-6 sm:p-8 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
             <Quote class="w-8 h-8 text-[var(--color-accent)]/20 absolute top-6 right-6" />
             <p class="text-sm sm:text-[15px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-6 relative">
-              "{quote}"
+              {quote}
             </p>
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
@@ -175,7 +175,7 @@ const websiteLd = {
 
   <!-- CTA -->
   <section class="py-20 sm:py-24">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="max-w-xl mx-auto text-center">
         <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Let's build something</h2>
         <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8 leading-relaxed">
