@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { hashIP } from '@utils/comments';
 
 function unauthorized() {
   return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -9,10 +10,48 @@ function unauthorized() {
   });
 }
 
+function tooManyRequests() {
+  return new Response(JSON.stringify({ error: 'Too many requests' }), {
+    status: 429,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    // Compare against self to burn constant time, then return false
+    const dummy = new TextEncoder().encode(a);
+    crypto.subtle.timingSafeEqual(dummy, dummy);
+    return false;
+  }
+  const encoder = new TextEncoder();
+  return crypto.subtle.timingSafeEqual(encoder.encode(a), encoder.encode(b));
+}
+
 function authorize(context: APIContext, env: any): boolean {
   const auth = context.request.headers.get('Authorization');
   if (!auth || !auth.startsWith('Bearer ')) return false;
-  return auth.slice(7) === env.ADMIN_SECRET;
+  return timingSafeEqual(auth.slice(7), env.ADMIN_SECRET);
+}
+
+async function checkAdminRateLimit(context: APIContext, env: any): Promise<boolean> {
+  const db = env.DB;
+  const clientIP = context.request.headers.get('CF-Connecting-IP') || context.request.headers.get('X-Forwarded-For') || '0.0.0.0';
+  const ipHash = await hashIP(clientIP, env.IP_HASH_SALT || '');
+
+  const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19);
+  const rateCheck = await db.prepare(
+    'SELECT COUNT(*) as count FROM rate_limits WHERE ip_hash = ? AND action = ? AND timestamp > ?'
+  ).bind(ipHash, 'admin_auth', fifteenMinAgo).first<{ count: number }>();
+
+  return !rateCheck || rateCheck.count < 10;
+}
+
+async function recordFailedAuth(context: APIContext, env: any): Promise<void> {
+  const db = env.DB;
+  const clientIP = context.request.headers.get('CF-Connecting-IP') || context.request.headers.get('X-Forwarded-For') || '0.0.0.0';
+  const ipHash = await hashIP(clientIP, env.IP_HASH_SALT || '');
+  await db.prepare('INSERT INTO rate_limits (ip_hash, action) VALUES (?, ?)').bind(ipHash, 'admin_auth').run();
 }
 
 export async function GET(context: APIContext) {
@@ -20,7 +59,11 @@ export async function GET(context: APIContext) {
     const { runtime } = context.locals as any;
     const env = runtime.env;
 
-    if (!authorize(context, env)) return unauthorized();
+    if (!await checkAdminRateLimit(context, env)) return tooManyRequests();
+    if (!authorize(context, env)) {
+      await recordFailedAuth(context, env);
+      return unauthorized();
+    }
 
     const db = env.DB;
     const { results } = await db.prepare(
@@ -45,7 +88,11 @@ export async function PATCH(context: APIContext) {
     const { runtime } = context.locals as any;
     const env = runtime.env;
 
-    if (!authorize(context, env)) return unauthorized();
+    if (!await checkAdminRateLimit(context, env)) return tooManyRequests();
+    if (!authorize(context, env)) {
+      await recordFailedAuth(context, env);
+      return unauthorized();
+    }
 
     const db = env.DB;
     const body = await context.request.json() as { id: number; approved: number };
@@ -77,7 +124,11 @@ export async function DELETE(context: APIContext) {
     const { runtime } = context.locals as any;
     const env = runtime.env;
 
-    if (!authorize(context, env)) return unauthorized();
+    if (!await checkAdminRateLimit(context, env)) return tooManyRequests();
+    if (!authorize(context, env)) {
+      await recordFailedAuth(context, env);
+      return unauthorized();
+    }
 
     const db = env.DB;
     const body = await context.request.json() as { id: number };

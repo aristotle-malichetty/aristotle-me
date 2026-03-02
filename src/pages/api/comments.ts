@@ -63,7 +63,14 @@ export async function POST(context: APIContext) {
 
     // IP hash for rate limiting
     const clientIP = context.request.headers.get('CF-Connecting-IP') || context.request.headers.get('X-Forwarded-For') || '0.0.0.0';
-    const ipHash = await hashIP(clientIP, env.IP_HASH_SALT || 'aristotle_default_salt');
+    if (!env.IP_HASH_SALT) {
+      console.error('IP_HASH_SALT environment variable is not set');
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const ipHash = await hashIP(clientIP, env.IP_HASH_SALT);
 
     // Spam content filter — silently save as unapproved
     const isSpam = isSpamContent(data.comment_text);
