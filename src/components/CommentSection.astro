@@ -380,12 +380,10 @@ const { slug, turnstileSiteKey } = Astro.props;
     });
 
     // Top-level form submit
-    setupFormSubmit(topForm, null, mainTurnstileId, () => mainTurnstileId);
+    setupFormSubmit(topForm, () => mainTurnstileId);
 
     function setupFormSubmit(
       form: HTMLFormElement,
-      _parentId: number | null,
-      _turnstileId: string | undefined,
       getTurnstileId: () => string | undefined,
     ) {
       form.addEventListener('submit', async (e) => {

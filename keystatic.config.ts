@@ -1,4 +1,4 @@
-import { config, fields, collection, singleton } from '@keystatic/core';
+import { config, fields, collection } from '@keystatic/core';
 
 export default config({
   storage: { kind: 'local' },
@@ -72,26 +72,6 @@ export default config({
         content: fields.markdoc({
           label: 'Content',
         }),
-      },
-    }),
-  },
-  singletons: {
-    settings: singleton({
-      label: 'Site Settings',
-      path: 'src/content/settings',
-      schema: {
-        siteName: fields.text({ label: 'Site Name', defaultValue: 'aristotle.me' }),
-        siteDescription: fields.text({
-          label: 'Site Description',
-          multiline: true,
-          defaultValue: 'Marketing Analyst, SaaS Builder, and AI-Powered Developer',
-        }),
-        socialLinks: fields.object({
-          github: fields.url({ label: 'GitHub' }),
-          linkedin: fields.url({ label: 'LinkedIn' }),
-          twitter: fields.url({ label: 'X / Twitter' }),
-          email: fields.text({ label: 'Email' }),
-        }, { label: 'Social Links' }),
       },
     }),
   },

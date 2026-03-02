@@ -16,6 +16,6 @@
 	"d1_databases": [{
 		"binding": "DB",
 		"database_name": "aristotle-comments",
-		"database_id": "fef37378-f971-4829-9403-aae49c5d18a3"
+		"database_id": "your-d1-database-id"
 	}]
 }

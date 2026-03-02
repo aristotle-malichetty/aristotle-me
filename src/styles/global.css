@@ -344,15 +344,6 @@ body {
   transform: translateY(100%);
 }
 
-/* Hide scrollbar but keep scroll */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
 /* Prevent body horizontal scroll from TOC overflow */
 body {
   overflow-x: clip;
@@ -417,40 +408,4 @@ body {
   padding-left: 0.75rem;
 }
 
-/* Gradient mesh background — replaced with subtle dot grid */
-.gradient-mesh {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  opacity: 0.4;
-  filter: blur(80px);
-  pointer-events: none;
-}
-
-.dark .gradient-mesh {
-  opacity: 0.2;
-}
-
-.gradient-mesh::before,
-.gradient-mesh::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-}
-
-.gradient-mesh::before {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
-  top: -200px;
-  right: -100px;
-}
-
-.gradient-mesh::after {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
-  bottom: -200px;
-  left: -100px;
-}
 

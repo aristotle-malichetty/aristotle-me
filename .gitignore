@@ -41,3 +41,12 @@ pnpm-debug.log*
 
 # Local drafts
 .drafts/
+
+# Claude Code config (skills, memory)
+.claude/
+
+# Root-level screenshots (dev artifacts)
+desktop-*.png
+mobile-*.png
+*-desktop.png
+*-mobile.png
