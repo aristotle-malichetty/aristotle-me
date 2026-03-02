@@ -218,14 +218,16 @@ body {
 }
 
 .prose table {
-  width: 100%;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 1.5em 0;
   font-size: 0.925rem;
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--color-border-light);
   border-radius: 0.75rem;
-  overflow: hidden;
 }
 
 .dark .prose table {
