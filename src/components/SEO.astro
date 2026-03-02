@@ -20,7 +20,7 @@ const {
 } = Astro.props;
 
 const siteName = 'aristotle.me';
-const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+const fullTitle = title.startsWith(siteName) ? title : `${title} | ${siteName}`;
 const imageURL = new URL(image, Astro.site).href;
 ---
 

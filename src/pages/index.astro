@@ -13,11 +13,13 @@ const testimonials = [
     quote: 'He turns complex datasets into clear insights and builds automations that reduce manual work and improve efficiency. His work has directly supported our growth and operational improvements.',
     name: 'Biswajit Pradhan',
     role: 'CEO, Digital Domination',
+    image: '/images/testimonials/biswajit-pradhan.jpg',
   },
   {
     quote: 'Aristotle consistently delivers thoughtful, data-driven solutions and explains complex ideas with clarity and balance. Strategic, reliable, and a strong contributor on cross-functional initiatives.',
     name: 'Fernando Ortiz, HCCP',
     role: 'Regional Manager, Equity Management Partners',
+    image: '/images/testimonials/fernando-ortiz.jpg',
   },
 ];
 
@@ -52,7 +54,7 @@ const websiteLd = {
 ---
 
 <BaseLayout
-  title="aristotle.me"
+  title="aristotle.me - Analytics, Products, and AI"
   description="Aris Malichetty — marketing analyst, product builder, and developer who builds with AI."
 >
   <Hero />
@@ -152,16 +154,24 @@ const websiteLd = {
         </div>
       </div>
       <div class="grid sm:grid-cols-2 gap-5">
-        {testimonials.map(({ quote, name, role }) => (
-          <div class="relative p-6 sm:p-8 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
-            <Quote class="w-8 h-8 text-[var(--color-accent)]/20 absolute top-6 right-6" />
-            <p class="text-sm sm:text-[15px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-6 relative">
+        {testimonials.map(({ quote, name, role, image }) => (
+          <div class="relative p-7 sm:p-10 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+            <Quote class="w-8 h-8 text-[var(--color-accent)]/20 absolute top-7 right-7 sm:top-10 sm:right-10" />
+            <p class="text-[15px] sm:text-base text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-8 relative">
               {quote}
             </p>
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
-                <span class="text-xs font-bold text-[var(--color-accent)]">{name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
-              </div>
+              {image ? (
+                <img
+                  src={image}
+                  alt={name}
+                  class="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div class="w-12 h-12 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
+                  <span class="text-sm font-bold text-[var(--color-accent)]">{name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
+                </div>
+              )}
               <div>
                 <p class="text-sm font-semibold">{name}</p>
                 <p class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{role}</p>
@@ -177,7 +187,7 @@ const websiteLd = {
   <section class="py-20 sm:py-24">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="max-w-xl mx-auto text-center">
-        <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Let's build something</h2>
+        <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Let's build something</h2>
         <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8 leading-relaxed">
           Have a project in mind — or a problem that needs solving? Let's talk.
         </p>
