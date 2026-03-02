@@ -84,27 +84,34 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
     const posts = document.querySelectorAll<HTMLElement>('#posts-grid > div');
     if (!buttons.length || !posts.length) return;
 
+    function selectTag(tag: string) {
+      buttons.forEach((b) => {
+        b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+        b.classList.add('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+      });
+
+      const active = Array.from(buttons).find((b) => b.dataset.tag === tag) || buttons[0];
+      active.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+      active.classList.remove('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+
+      posts.forEach((post) => {
+        if (tag === 'all') {
+          post.style.display = '';
+        } else {
+          const postTags: string[] = JSON.parse(post.dataset.tags || '[]');
+          post.style.display = postTags.includes(tag) ? '' : 'none';
+        }
+      });
+    }
+
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const tag = btn.dataset.tag;
-
-        buttons.forEach((b) => {
-          b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
-          b.classList.add('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
-        });
-
-        btn.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
-        btn.classList.remove('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
-
-        posts.forEach((post) => {
-          if (tag === 'all') {
-            post.style.display = '';
-          } else {
-            const postTags: string[] = JSON.parse(post.dataset.tags || '[]');
-            post.style.display = postTags.includes(tag!) ? '' : 'none';
-          }
-        });
+        selectTag(btn.dataset.tag!);
       });
     });
+
+    // Auto-select tag from URL query param
+    const urlTag = new URLSearchParams(window.location.search).get('tag');
+    if (urlTag) selectTag(urlTag);
   });
 </script>
