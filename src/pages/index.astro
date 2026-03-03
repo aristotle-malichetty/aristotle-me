@@ -13,13 +13,13 @@ const testimonials = [
     quote: 'He turns complex datasets into clear insights and builds automations that reduce manual work and improve efficiency. His work has directly supported our growth and operational improvements.',
     name: 'Biswajit Pradhan',
     role: 'CEO, Digital Domination',
-    image: '/images/testimonials/biswajit-pradhan.jpg',
+    image: '/images/testimonials/biswajit-pradhan.webp',
   },
   {
     quote: 'Aristotle consistently delivers thoughtful, data-driven solutions and explains complex ideas with clarity and balance. Strategic, reliable, and a strong contributor on cross-functional initiatives.',
     name: 'Fernando Ortiz, HCCP',
     role: 'Regional Manager, Equity Management Partners',
-    image: '/images/testimonials/fernando-ortiz.jpg',
+    image: '/images/testimonials/fernando-ortiz.webp',
   },
 ];
 
@@ -90,7 +90,7 @@ const websiteLd = {
         <div class="mt-6 sm:hidden text-center">
           <a
             href="/blog"
-            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)]"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] underline underline-offset-2 decoration-1"
           >
             View all posts <ArrowRight class="w-3.5 h-3.5" />
           </a>
@@ -131,7 +131,7 @@ const websiteLd = {
         <div class="mt-6 sm:hidden text-center">
           <a
             href="/projects"
-            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)]"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] underline underline-offset-2 decoration-1"
           >
             View all projects <ArrowRight class="w-3.5 h-3.5" />
           </a>
@@ -165,6 +165,8 @@ const websiteLd = {
                 <img
                   src={image}
                   alt={name}
+                  width="48"
+                  height="48"
                   class="w-12 h-12 rounded-full object-cover"
                 />
               ) : (

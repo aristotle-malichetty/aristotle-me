@@ -120,6 +120,8 @@ const breadcrumbLd = {
           <img
             src="/images/avatar.png"
             alt="Aristotle Malichetty"
+            width="40"
+            height="40"
             class="w-10 h-10 rounded-full"
           />
           <div class="flex items-center flex-wrap gap-x-1.5 text-sm">
@@ -220,6 +222,8 @@ const breadcrumbLd = {
             <img
               src="/images/avatar.png"
               alt="Aristotle Malichetty"
+              width="48"
+              height="48"
               class="w-12 h-12 rounded-full"
             />
             <div>
@@ -279,6 +283,7 @@ const breadcrumbLd = {
     id="share-modal"
     class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200"
     aria-hidden="true"
+    inert
   >
     <!-- Backdrop -->
     <div id="share-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
@@ -372,6 +377,7 @@ const breadcrumbLd = {
         id="mobile-toc-overlay"
         class="fixed inset-0 z-[100] xl:hidden opacity-0 pointer-events-none transition-opacity duration-200"
         aria-hidden="true"
+        inert
       >
         {/* Backdrop */}
         <div id="mobile-toc-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
@@ -481,6 +487,7 @@ const breadcrumbLd = {
         overlay!.classList.remove('pointer-events-none', 'opacity-0');
         overlay!.classList.add('opacity-100');
         overlay!.setAttribute('aria-hidden', 'false');
+        overlay!.removeAttribute('inert');
         sheet!.classList.remove('mobile-toc-sheet-hidden');
         document.body.style.overflow = 'hidden';
       }
@@ -489,6 +496,7 @@ const breadcrumbLd = {
         overlay!.classList.add('opacity-0', 'pointer-events-none');
         overlay!.classList.remove('opacity-100');
         overlay!.setAttribute('aria-hidden', 'true');
+        overlay!.setAttribute('inert', '');
         sheet!.classList.add('mobile-toc-sheet-hidden');
         document.body.style.overflow = '';
       }
@@ -549,6 +557,7 @@ const breadcrumbLd = {
         modal!.classList.remove('pointer-events-none', 'opacity-0');
         modal!.classList.add('opacity-100');
         modal!.setAttribute('aria-hidden', 'false');
+        modal!.removeAttribute('inert');
         card!.classList.remove('scale-95');
         card!.classList.add('scale-100');
         document.body.style.overflow = 'hidden';
@@ -558,6 +567,7 @@ const breadcrumbLd = {
         modal!.classList.add('opacity-0', 'pointer-events-none');
         modal!.classList.remove('opacity-100');
         modal!.setAttribute('aria-hidden', 'true');
+        modal!.setAttribute('inert', '');
         card!.classList.add('scale-95');
         card!.classList.remove('scale-100');
         document.body.style.overflow = '';
