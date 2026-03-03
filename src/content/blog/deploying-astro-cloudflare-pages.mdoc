@@ -1,0 +1,208 @@
+---
+title: My Astro Site Was Live in 10 Minutes. Then Nothing Worked.
+description: "Deployed to Cloudflare Pages. Turnstile invisible, Keystatic broken, secrets in the repo. Here's every gotcha I hit and how I fixed them."
+date: 2026-03-03
+tags:
+  - Web Development
+  - Astro
+  - Cloudflare
+  - Building in Public
+draft: true
+---
+
+I deployed my site to Cloudflare Pages. Took about 10 minutes.
+
+Then I opened a blog post. The Turnstile captcha on my comment form? Gone. Invisible. Like it was never there.
+
+I went to `/keystatic`, my CMS. It loaded. No login screen. No authentication. Anyone on the internet could see it. And when I clicked into a collection, it broke. "Unable to load collection. Unexpected token."
+
+Two features. Both broken. Both worked perfectly on localhost.
+
+Here's every gotcha I hit going from `npm run dev` to a live site on Cloudflare Pages. And how to avoid all of them.
+
+## Connecting GitHub to Cloudflare Pages
+
+This part is easy. Almost suspiciously easy.
+
+Go to the Cloudflare dashboard. Workers & Pages. Create. Pages. Connect to Git. Pick your repo.
+
+Build settings:
+- Framework preset: **Astro**
+- Build command: `npm run build`
+- Build output directory: `dist`
+
+Click Deploy.
+
+That's it. Every push to `main` triggers a new build. Your site goes live in about 30 seconds.
+
+If you want to test a one-off deploy without connecting GitHub, you can use the CLI instead:
+
+```
+npm run build
+npx wrangler pages deploy dist --project-name your-project-name
+```
+
+You'll need `npx wrangler login` first. But the GitHub method is better for anything you plan to maintain.
+
+## Your wrangler.jsonc Has Secrets in It
+
+This one almost got me.
+
+My `wrangler.jsonc` has the Cloudflare D1 database ID in it. That's not something you want sitting in a public repo.
+
+Here's what the file looks like:
+
+```json
+{
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "aristotle-comments",
+    "database_id": "fef37378-f971-xxxx-xxxx-xxxxxxxxxxxx"
+  }]
+}
+```
+
+That database ID is tied to your Cloudflare account. Not the kind of thing you push to GitHub.
+
+The fix takes three commands:
+
+```bash
+# Stop tracking the file in git (doesn't delete it locally)
+git rm --cached wrangler.jsonc
+
+# Add it to .gitignore
+echo "wrangler.jsonc" >> .gitignore
+
+# Commit
+git add .gitignore && git commit -m "gitignore wrangler.jsonc"
+```
+
+The `git rm --cached` part confused me at first. Git shows "deleted: wrangler.jsonc" and it looks like your file is gone. It's not. The file is still on your machine. Git just stops tracking it. Future commits won't include it.
+
+If you haven't created your D1 database yet, run this first:
+
+```bash
+npx wrangler d1 create your-database-name
+```
+
+It gives you the database ID. Paste that into your `wrangler.jsonc`. Then gitignore the file before you push.
+
+## Secret vs Text in the Cloudflare Dashboard
+
+When you add environment variables in Cloudflare Pages, you get two options: **Secret** and **Text**.
+
+Simple rule. If it shows up in your HTML (the browser can see it anyway), use Text. Everything else is Secret.
+
+For my setup:
+
+| Variable | Type | Why |
+|---|---|---|
+| `PUBLIC_TURNSTILE_SITE_KEY` | Text | It's in the HTML. Browsers need it. |
+| `TURNSTILE_SECRET_KEY` | Secret | Server-side only. Verifies captcha responses. |
+| `ADMIN_SECRET` | Secret | Admin password. Obviously. |
+| `IP_HASH_SALT` | Secret | Used to hash IPs for rate limiting. |
+
+For the `IP_HASH_SALT`, don't reuse whatever you had in your `.dev.vars` file. Generate a fresh one for production:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the output. Paste it as the value. Done.
+
+One thing that tripped me up. After you add all your variables and hit save, they don't apply to your current deployment. You need to trigger a new build. Either push a commit or click "Retry deployment" in the Cloudflare dashboard.
+
+This sounds obvious. It wasn't obvious to me at the time.
+
+## Why My Turnstile Captcha Was Invisible
+
+This was the big one. And it took me a while to figure out.
+
+My blog posts use `export const prerender = true` in Astro. That means they're built as static HTML at build time. Not generated on each request.
+
+Here's the problem. The Turnstile site key is read from an environment variable:
+
+```js
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
+```
+
+When `prerender = true`, this code runs during the build. Not when someone visits the page. So the value of `PUBLIC_TURNSTILE_SITE_KEY` has to exist when Cloudflare builds your site.
+
+I deployed first. Added env vars after. Turnstile never saw the key.
+
+The HTML had `data-sitekey=""`. Empty string. Turnstile looked at that and said "nothing to do here." No error. No warning. Just silently missing.
+
+**The fix:** add your `PUBLIC_` env vars in Cloudflare *before* you deploy. Or if you already deployed, just redeploy after adding them.
+
+This applies to any `PUBLIC_` variable on a prerendered page. If it's empty during the build, it's empty forever on that deployment.
+
+## Keystatic Broke the Moment I Went Live
+
+On localhost, Keystatic is great. Clean CMS interface at `/keystatic`. Edit blog posts, manage projects, all through a browser.
+
+Then I went to `aristotle.me/keystatic` on production.
+
+Two problems.
+
+**First, no authentication.** The dashboard just opened. No login. No password. Nothing. Anyone with the URL could see my CMS. That's a security issue.
+
+**Second, it crashed.** I clicked "Blog Posts" and got: "Unable to load collection. Unexpected token 'T', 'The Keysta...' is not valid JSON."
+
+Both problems have the same root cause. My Keystatic config was set to `storage: { kind: 'local' }`. That means it reads and writes directly to the filesystem. On your laptop, that's your project folder. On Cloudflare Pages, there is no filesystem. There's nothing to read from.
+
+You have two options.
+
+**Option 1: GitHub storage.** Change the storage to `kind: 'github'` for production. Keystatic reads and writes through the GitHub API. This also adds GitHub OAuth for authentication. Nobody gets in without a GitHub login.
+
+This requires creating a GitHub OAuth app and setting up three more env vars (`KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET`). Works well but adds complexity.
+
+**Option 2: Local only.** If you write posts from your terminal anyway (like I do with Claude Code), you might not need a production CMS at all.
+
+I went with option 2. Here's the change in `astro.config.mjs`:
+
+```js
+const isDev = process.env.NODE_ENV !== 'production';
+
+export default defineConfig({
+  integrations: [
+    // ...other integrations
+    ...(isDev ? [keystatic()] : []),
+  ],
+});
+```
+
+Keystatic loads in dev mode. In production, it's completely gone. `/keystatic` returns a 404. No CMS to break into. No orphaned routes.
+
+If you use Keystatic from a browser regularly, go with option 1. If your content workflow is terminal-first, option 2 is cleaner.
+
+## The Full Deploy Checklist
+
+Here's what I wish I had before I started. Everything in one place.
+
+**Before your first deploy:**
+1. Create your D1 database with `wrangler d1 create`
+2. Update `wrangler.jsonc` with the real database ID
+3. Add `wrangler.jsonc` to `.gitignore` and `git rm --cached` it
+4. Add all env vars in Cloudflare Pages settings (both Secret and Text)
+5. Decide on Keystatic: GitHub storage or local-only
+6. Push to GitHub
+
+**After your first deploy:**
+1. Check every page that uses a `PUBLIC_` env var
+2. Verify Turnstile shows up on comment forms
+3. Try visiting `/keystatic` to confirm it's either authenticated or 404
+4. Open DevTools, check for console errors
+5. If anything's wrong, fix it and redeploy. Env vars only apply to new builds.
+
+**Variables you'll need in Cloudflare:**
+
+| Variable | Type |
+|---|---|
+| `PUBLIC_TURNSTILE_SITE_KEY` | Text |
+| `TURNSTILE_SECRET_KEY` | Secret |
+| `ADMIN_SECRET` | Secret |
+| `IP_HASH_SALT` | Secret (fresh random value) |
+
+The deploy itself takes 10 minutes. The gotchas take an hour if you don't know about them.
+
+Now you know about them.

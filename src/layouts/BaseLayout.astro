@@ -9,6 +9,9 @@ import '@fontsource-variable/dm-sans';
 import '@fontsource/jetbrains-mono';
 import '@/styles/global.css';
 
+import bricolageFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2';
+import dmSansFont from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2';
+
 interface Props {
   title: string;
   description: string;
@@ -30,6 +33,8 @@ const { title, description, image, type, publishedDate, modifiedDate } = Astro.p
     <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="alternate" type="application/rss+xml" title="aristotle.me" href="/rss.xml" />
+    <link rel="preload" href={bricolageFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={dmSansFont} as="font" type="font/woff2" crossorigin />
     <SEO
       title={title}
       description={description}

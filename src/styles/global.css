@@ -316,7 +316,7 @@ body {
 
 /* TOC card */
 #toc-card {
-  transition: opacity 0.3s ease, transform 0.3s ease, width 0.3s ease, padding 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   transform-origin: left center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.04);
 }
