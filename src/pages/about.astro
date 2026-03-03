@@ -55,6 +55,30 @@ const workingOn = [
   },
 ];
 
+const profilePageLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: 'Aristotle Malichetty',
+    alternateName: 'Aris',
+    url: 'https://aristotle.me',
+    image: 'https://aristotle.me/og/about.png',
+    jobTitle: 'Marketing Analyst & Product Builder',
+    description: 'Marketing analyst, product builder, and developer who builds with AI. Helps companies with go-to-market, lead gen systems, and analytics dashboards.',
+    alumniOf: {
+      '@type': 'EducationalOrganization',
+      name: 'University of New Haven',
+    },
+    knowsAbout: ['Marketing Analytics', 'Product Development', 'AI Development', 'Lead Generation', 'Data Visualization'],
+    sameAs: [
+      'https://linkedin.com/in/aristotlem',
+      'https://github.com/aristotle-malichetty',
+      'https://x.com/aristotle_me',
+    ],
+  },
+};
+
 const techStackGroups = [
   {
     label: 'Analytics & BI',
@@ -218,4 +242,6 @@ const techStackGroups = [
       </div>
     </div>
   </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(profilePageLd)} />
 </BaseLayout>
