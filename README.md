@@ -105,17 +105,34 @@ Blog posts have a comment system with:
 
 Pushes to `main` auto-deploy to Cloudflare Pages. The site uses Cloudflare Workers for server-side routes (comments API) and D1 for the comments database.
 
-For production, set your environment variables as secrets in the Cloudflare dashboard:
+### 1. Environment Variables
+
+Set these in the Cloudflare dashboard under **Workers & Pages > your-project > Settings > Environment Variables** (Production):
+
+| Variable | Description |
+|---|---|
+| `TURNSTILE_SECRET_KEY` | Turnstile server-side key |
+| `ADMIN_SECRET` | Bearer token for comment moderation |
+| `IP_HASH_SALT` | Random string for IP hashing |
+
+### 2. D1 Database Binding
+
+**This step is required.** The `wrangler.jsonc` config alone is not enough for Pages deployments. Without this, comments will return "Service unavailable" (503).
+
+In the Cloudflare dashboard, go to **Workers & Pages > your-project > Settings > Bindings** and add:
+
+| Type | Variable name | Resource |
+|---|---|---|
+| D1 Database | `DB` | `aristotle-comments` |
+
+### 3. Run Migrations
+
+Apply migrations to the remote D1 database:
 
 ```sh
-npx wrangler secret put TURNSTILE_SECRET_KEY
-npx wrangler secret put ADMIN_SECRET
-npx wrangler secret put IP_HASH_SALT
+npx wrangler d1 migrations apply aristotle-comments --remote
 ```
 
-And run migrations against the remote D1 database:
+### 4. Redeploy
 
-```sh
-npx wrangler d1 execute aristotle-comments --remote --file=migrations/0001_create_comments.sql
-npx wrangler d1 execute aristotle-comments --remote --file=migrations/0002_add_comment_likes.sql
-```
+Trigger a new deployment (or retry the latest) for bindings to take effect.
