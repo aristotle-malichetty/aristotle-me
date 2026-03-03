@@ -6,8 +6,15 @@ import { validateCommentInput, sanitizeText, isSpamContent, hashIP } from '@util
 export async function POST(context: APIContext) {
   try {
     const { runtime } = context.locals as any;
-    const env = runtime.env;
-    const db = env.DB;
+    const env = runtime?.env;
+    const db = env?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const body = await context.request.json();
 

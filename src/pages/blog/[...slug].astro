@@ -309,7 +309,7 @@ const breadcrumbLd = {
 
       <!-- Post preview card -->
       <div class="rounded-xl overflow-hidden bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] mb-6">
-        <img src={ogImage} alt={post.data.title} width="1200" height="630" class="w-full object-cover" />
+        <img src={ogImage} alt={post.data.title} width="1200" height="630" loading="lazy" decoding="async" fetchpriority="low" class="w-full object-cover" />
       </div>
 
       <!-- Share options -->

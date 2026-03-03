@@ -22,11 +22,11 @@ const statusColor = {
 
 <div class="group flex flex-col h-full p-7 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)] hover:border-[var(--color-border-dark)]/20 dark:hover:border-[var(--color-border-light)]/20 transition-all duration-300">
   <div class="flex items-start justify-between mb-3">
-    <h3 class="font-display text-lg font-semibold transition-colors flex items-center gap-2">
+    <h2 class="font-display text-lg font-semibold transition-colors flex items-center gap-2">
       <span class={`inline-block w-2 h-2 rounded-full ${statusColor} shrink-0`} aria-hidden="true"></span>
       <span class="sr-only">({status ?? 'idea'})</span>
       {title}
-    </h3>
+    </h2>
     <div class="flex items-center gap-2 shrink-0 ml-3">
       {url && (
         <a

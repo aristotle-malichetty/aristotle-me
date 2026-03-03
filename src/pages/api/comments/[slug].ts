@@ -7,7 +7,15 @@ import type { Comment } from '@utils/comments';
 export async function GET(context: APIContext) {
   try {
     const { runtime } = context.locals as any;
-    const db = runtime.env.DB;
+    const db = runtime?.env?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ comments: [], total: 0 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const slug = context.params.slug;
 
     if (!slug) {
