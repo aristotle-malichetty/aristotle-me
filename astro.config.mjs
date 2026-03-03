@@ -21,7 +21,7 @@ export default defineConfig({
     react(),
     markdoc(),
     sitemap({
-      filter: (page) => !page.includes('/keystatic'),
+      filter: (page) => !page.includes('/keystatic') && !page.includes('/admin'),
     }),
     keystatic(),
   ],

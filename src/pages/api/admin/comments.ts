@@ -18,14 +18,27 @@ function tooManyRequests() {
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    // Compare against self to burn constant time, then return false
-    const dummy = new TextEncoder().encode(a);
-    crypto.subtle.timingSafeEqual(dummy, dummy);
-    return false;
-  }
   const encoder = new TextEncoder();
-  return crypto.subtle.timingSafeEqual(encoder.encode(a), encoder.encode(b));
+  const bufA = encoder.encode(a);
+  const bufB = encoder.encode(b);
+
+  // crypto.subtle.timingSafeEqual is Cloudflare Workers-only; fall back to
+  // constant-time byte comparison in environments that lack it (e.g. local dev).
+  if (typeof crypto.subtle.timingSafeEqual === 'function') {
+    if (bufA.byteLength !== bufB.byteLength) {
+      crypto.subtle.timingSafeEqual(bufA, bufA); // burn constant time
+      return false;
+    }
+    return crypto.subtle.timingSafeEqual(bufA, bufB);
+  }
+
+  // Fallback: constant-time comparison via XOR accumulator
+  if (bufA.byteLength !== bufB.byteLength) return false;
+  let mismatch = 0;
+  for (let i = 0; i < bufA.byteLength; i++) {
+    mismatch |= bufA[i] ^ bufB[i];
+  }
+  return mismatch === 0;
 }
 
 function authorize(context: APIContext, env: any): boolean {

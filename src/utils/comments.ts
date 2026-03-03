@@ -8,9 +8,11 @@ export interface Comment {
   created_at: string;
   approved: number;
   ip_hash?: string;
+  like_count?: number;
 }
 
 export interface CommentTree extends Omit<Comment, 'author_email' | 'ip_hash'> {
+  like_count: number;
   replies: CommentTree[];
 }
 
@@ -112,6 +114,7 @@ export function buildCommentTree(comments: Comment[]): CommentTree[] {
       comment_text: c.comment_text,
       created_at: c.created_at,
       approved: c.approved,
+      like_count: c.like_count || 0,
       replies: [],
     });
   }
@@ -124,6 +127,10 @@ export function buildCommentTree(comments: Comment[]): CommentTree[] {
       roots.push(node);
     }
   }
+
+  // Top-level: most liked first, then oldest first as tiebreaker
+  // Replies stay chronological so threads read naturally
+  roots.sort((a, b) => b.like_count - a.like_count || new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   return roots;
 }

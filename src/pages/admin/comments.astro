@@ -1,0 +1,363 @@
+---
+export const prerender = false;
+
+import BaseLayout from '@layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Comment Moderation" description="Admin comment moderation dashboard">
+  <!-- Login Screen -->
+  <div id="login-screen" class="min-h-[60vh] flex items-center justify-center px-4">
+    <div class="w-full max-w-sm">
+      <div class="bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] p-6">
+        <h1 class="font-display text-xl font-bold mb-4">Comment Moderation</h1>
+        <form id="login-form">
+          <input
+            type="password"
+            id="admin-password"
+            placeholder="Admin password"
+            required
+            autocomplete="current-password"
+            class="w-full px-3 py-2.5 rounded-lg bg-[var(--color-surface-light)] dark:bg-[var(--color-surface-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors mb-3"
+          />
+          <button
+            type="submit"
+            id="login-btn"
+            class="w-full px-4 py-2.5 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Sign In
+          </button>
+          <p id="login-error" class="hidden mt-3 text-sm text-red-500 text-center"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard (hidden until authenticated) -->
+  <div id="dashboard" class="hidden max-w-3xl mx-auto px-4 py-10">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <h1 class="font-display text-2xl font-bold">Comments</h1>
+        <span
+          id="pending-badge"
+          class="hidden px-2 py-0.5 rounded-full bg-[var(--color-accent)] text-white text-xs font-semibold"
+        ></span>
+      </div>
+      <button
+        id="logout-btn"
+        class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
+      >
+        Sign Out
+      </button>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex gap-1 mb-6 border-b border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
+      <button class="tab-btn active-tab px-4 py-2 text-sm font-medium transition-colors" data-filter="pending">Pending</button>
+      <button class="tab-btn px-4 py-2 text-sm font-medium transition-colors" data-filter="approved">Approved</button>
+      <button class="tab-btn px-4 py-2 text-sm font-medium transition-colors" data-filter="all">All</button>
+    </div>
+
+    <!-- Comment Cards -->
+    <div id="comment-cards" class="space-y-3"></div>
+    <p id="no-comments" class="hidden text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-8 text-center">
+      No comments to show.
+    </p>
+    <p id="loading-comments" class="hidden text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-8 text-center">
+      Loading comments...
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .tab-btn {
+    color: var(--color-text-secondary-light);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  :global(.dark) .tab-btn {
+    color: var(--color-text-secondary-dark);
+  }
+  .tab-btn.active-tab {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+  .tab-btn:hover:not(.active-tab) {
+    color: var(--color-text-primary-light);
+  }
+  :global(.dark) .tab-btn:hover:not(.active-tab) {
+    color: var(--color-text-primary-dark);
+  }
+</style>
+
+<script>
+  function initAdmin() {
+    const loginScreen = document.getElementById('login-screen')!;
+    const dashboard = document.getElementById('dashboard')!;
+    const loginForm = document.getElementById('login-form') as HTMLFormElement;
+    const passwordInput = document.getElementById('admin-password') as HTMLInputElement;
+    const loginBtn = document.getElementById('login-btn') as HTMLButtonElement;
+    const loginError = document.getElementById('login-error')!;
+    const logoutBtn = document.getElementById('logout-btn')!;
+    const pendingBadge = document.getElementById('pending-badge')!;
+    const commentCards = document.getElementById('comment-cards')!;
+    const noComments = document.getElementById('no-comments')!;
+    const loadingEl = document.getElementById('loading-comments')!;
+    const tabBtns = document.querySelectorAll('.tab-btn');
+
+    let token = sessionStorage.getItem('admin_token') || '';
+    let comments: any[] = [];
+    let currentFilter = 'pending';
+
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
+
+    function timeAgo(dateStr: string): string {
+      const date = new Date(dateStr + 'Z');
+      const now = new Date();
+      const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+      if (seconds < 60) return 'just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 30) return `${days}d ago`;
+      const months = Math.floor(days / 30);
+      if (months < 12) return `${months}mo ago`;
+      return `${Math.floor(months / 12)}y ago`;
+    }
+
+    // Auth
+    async function tryLogin(password: string): Promise<boolean> {
+      try {
+        const res = await fetch('/api/admin/comments', {
+          headers: { Authorization: `Bearer ${password}` },
+        });
+        if (res.status === 429) {
+          loginError.textContent = 'Too many attempts. Try again later.';
+          loginError.classList.remove('hidden');
+          return false;
+        }
+        if (!res.ok) {
+          loginError.textContent = 'Wrong password.';
+          loginError.classList.remove('hidden');
+          return false;
+        }
+        const data = await res.json();
+        comments = data.comments || [];
+        token = password;
+        sessionStorage.setItem('admin_token', token);
+        return true;
+      } catch {
+        loginError.textContent = 'Network error. Try again.';
+        loginError.classList.remove('hidden');
+        return false;
+      }
+    }
+
+    function showDashboard() {
+      loginScreen.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      updateBadge();
+      renderComments();
+    }
+
+    function showLogin() {
+      token = '';
+      sessionStorage.removeItem('admin_token');
+      dashboard.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+      passwordInput.value = '';
+      loginError.classList.add('hidden');
+    }
+
+    // Login form
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.classList.add('hidden');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Signing in...';
+
+      const ok = await tryLogin(passwordInput.value);
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Sign In';
+      if (ok) showDashboard();
+    });
+
+    logoutBtn.addEventListener('click', showLogin);
+
+    // Tabs
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach((b) => b.classList.remove('active-tab'));
+        btn.classList.add('active-tab');
+        currentFilter = (btn as HTMLElement).dataset.filter || 'pending';
+        renderComments();
+      });
+    });
+
+    // Badge
+    function updateBadge() {
+      const pendingCount = comments.filter((c) => c.approved === 0).length;
+      if (pendingCount > 0) {
+        pendingBadge.textContent = String(pendingCount);
+        pendingBadge.classList.remove('hidden');
+      } else {
+        pendingBadge.classList.add('hidden');
+      }
+    }
+
+    // Render
+    function renderComments() {
+      const filtered = comments.filter((c) => {
+        if (currentFilter === 'pending') return c.approved === 0;
+        if (currentFilter === 'approved') return c.approved === 1;
+        return true;
+      });
+
+      if (!filtered.length) {
+        commentCards.innerHTML = '';
+        noComments.classList.remove('hidden');
+        return;
+      }
+
+      noComments.classList.add('hidden');
+      commentCards.innerHTML = filtered.map((c) => renderCard(c)).join('');
+    }
+
+    function renderCard(c: any): string {
+      const safeName = escapeHtml(c.author_name);
+      const safeEmail = c.author_email ? escapeHtml(c.author_email) : '';
+      const safeText = escapeHtml(c.comment_text);
+      const safeSlug = escapeHtml(c.post_slug);
+      const isPending = c.approved === 0;
+      const statusPill = isPending
+        ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Pending</span>'
+        : '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Approved</span>';
+
+      const approveBtn = isPending
+        ? `<button class="action-btn approve-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors" data-id="${c.id}">Approve</button>`
+        : `<button class="action-btn hide-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500 text-white hover:bg-amber-600 transition-colors" data-id="${c.id}">Hide</button>`;
+
+      const parentNote = c.parent_id
+        ? `<span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">reply to #${c.parent_id}</span>`
+        : '';
+
+      return `
+        <div class="comment-card bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] p-4" data-comment-id="${c.id}">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              ${statusPill}
+              <span class="font-semibold text-sm">${safeName}</span>
+              ${safeEmail ? `<span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">${safeEmail}</span>` : ''}
+            </div>
+            <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] whitespace-nowrap">${timeAgo(c.created_at)}</span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <a href="/blog/${safeSlug}" class="text-xs text-[var(--color-accent)] hover:underline">/blog/${safeSlug}</a>
+            ${parentNote}
+          </div>
+          <p class="text-sm leading-relaxed mb-3 break-words">${safeText}</p>
+          <div class="flex items-center gap-2">
+            ${approveBtn}
+            <button class="action-btn delete-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors" data-id="${c.id}">Delete</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Actions (event delegation)
+    commentCards.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest('.action-btn') as HTMLElement | null;
+      if (!btn) return;
+
+      const id = Number(btn.dataset.id);
+      if (!id) return;
+
+      if (btn.classList.contains('approve-btn')) {
+        await patchComment(id, 1);
+      } else if (btn.classList.contains('hide-btn')) {
+        await patchComment(id, 0);
+      } else if (btn.classList.contains('delete-btn')) {
+        if (!confirm('Permanently delete this comment?')) return;
+        await deleteComment(id);
+      }
+    });
+
+    async function patchComment(id: number, approved: number) {
+      try {
+        const res = await fetch('/api/admin/comments', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id, approved }),
+        });
+        if (res.status === 401) { showLogin(); return; }
+        if (!res.ok) return;
+
+        const comment = comments.find((c) => c.id === id);
+        if (comment) comment.approved = approved;
+        updateBadge();
+        renderComments();
+      } catch { /* network error, silently fail */ }
+    }
+
+    async function deleteComment(id: number) {
+      try {
+        const res = await fetch('/api/admin/comments', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id }),
+        });
+        if (res.status === 401) { showLogin(); return; }
+        if (!res.ok) return;
+
+        comments = comments.filter((c) => c.id !== id);
+        updateBadge();
+        renderComments();
+      } catch { /* network error, silently fail */ }
+    }
+
+    // Auto-login with stored token
+    async function checkStoredToken() {
+      if (!token) return;
+
+      loadingEl.classList.remove('hidden');
+      loginScreen.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/admin/comments', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          showLogin();
+          return;
+        }
+        const data = await res.json();
+        comments = data.comments || [];
+        showDashboard();
+      } catch {
+        showLogin();
+      } finally {
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    checkStoredToken();
+  }
+
+  initAdmin();
+  document.addEventListener('astro:after-swap', initAdmin);
+</script>

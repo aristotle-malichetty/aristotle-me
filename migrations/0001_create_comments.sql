@@ -6,7 +6,7 @@ CREATE TABLE comments (
   author_email TEXT,
   comment_text TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  approved INTEGER NOT NULL DEFAULT 1,
+  approved INTEGER NOT NULL DEFAULT 0,
   ip_hash TEXT
 );
 

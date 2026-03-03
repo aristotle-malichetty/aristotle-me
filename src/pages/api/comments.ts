@@ -111,7 +111,7 @@ export async function POST(context: APIContext) {
       data.author_name,
       data.author_email || null,
       data.comment_text,
-      isSpam ? 0 : 1,
+      0,
       ipHash
     ).run();
 

@@ -2,7 +2,7 @@
 
 ## Project
 
-aristotle.me — personal website and blog for Aris Malichetty. Astro 5 + Keystatic CMS + Tailwind CSS 4, deployed on Cloudflare Pages.
+aristotle.me — personal website and blog for Aristotle Malichetty. Astro 5 + Keystatic CMS + Tailwind CSS 4, deployed on Cloudflare Pages.
 
 ## Voice Profile
 

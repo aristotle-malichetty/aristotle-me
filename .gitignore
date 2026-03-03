@@ -14,15 +14,23 @@ pnpm-debug.log*
 
 
 # environment variables
-.env
-.env.production
+.env*
+!.env.example
 .dev.vars
 
 # macOS-specific files
 .DS_Store
+Thumbs.db
 
-# jetbrains setting folder
+# IDE config
+.vscode/
 .idea/
+
+# database files
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.db
 
 # testing screenshots
 .screenshots/
@@ -45,8 +53,5 @@ pnpm-debug.log*
 # Claude Code config (skills, memory)
 .claude/
 
-# Root-level screenshots (dev artifacts)
-desktop-*.png
-mobile-*.png
-*-desktop.png
-*-mobile.png
+# Dev screenshots (Playwright/browser testing artifacts)
+.dev-screenshots/
