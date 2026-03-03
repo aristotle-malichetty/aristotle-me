@@ -29,8 +29,10 @@ const { slug, turnstileSiteKey } = Astro.props;
 
     <div class="grid sm:grid-cols-2 gap-3 mb-3">
       <div>
+        <label for="comment-name" class="sr-only">Name</label>
         <input
           type="text"
+          id="comment-name"
           name="author_name"
           placeholder="Name *"
           required
@@ -39,8 +41,10 @@ const { slug, turnstileSiteKey } = Astro.props;
         />
       </div>
       <div>
+        <label for="comment-email" class="sr-only">Email</label>
         <input
           type="email"
+          id="comment-email"
           name="author_email"
           placeholder="Email (optional, not displayed)"
           maxlength="254"
@@ -49,7 +53,9 @@ const { slug, turnstileSiteKey } = Astro.props;
       </div>
     </div>
 
+    <label for="comment-text" class="sr-only">Comment</label>
     <textarea
+      id="comment-text"
       name="comment_text"
       placeholder="Share your thoughts..."
       required
@@ -71,7 +77,7 @@ const { slug, turnstileSiteKey } = Astro.props;
 
     <!-- Status messages -->
     <p class="form-error hidden mt-2 text-sm text-red-500"></p>
-    <p class="form-success hidden mt-2 text-sm text-[var(--color-accent)]">Your comment has been submitted and is awaiting moderation.</p>
+    <p class="form-success hidden mt-2 text-sm text-green-600 dark:text-green-400">Your comment has been submitted and is awaiting moderation.</p>
   </form>
 
   <!-- Comments list -->
@@ -247,14 +253,18 @@ const { slug, turnstileSiteKey } = Astro.props;
             </span>
             <button type="button" class="reply-cancel text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors">Cancel</button>
           </div>
+          <label class="sr-only" for="reply-name-${commentId}">Name</label>
           <input
             type="text"
+            id="reply-name-${commentId}"
             class="reply-name w-full px-3 py-2 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors mb-2"
             placeholder="Name *"
             required
             maxlength="100"
           />
+          <label class="sr-only" for="reply-text-${commentId}">Reply</label>
           <textarea
+            id="reply-text-${commentId}"
             class="reply-text w-full px-3 py-2 rounded-lg bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-sm placeholder:text-[var(--color-text-secondary-light)]/50 dark:placeholder:text-[var(--color-text-secondary-dark)]/50 focus:outline-none focus:border-[var(--color-accent)] transition-colors resize-y mb-2"
             placeholder="Write a reply..."
             rows="3"
@@ -264,7 +274,7 @@ const { slug, turnstileSiteKey } = Astro.props;
           <div class="flex items-center gap-2">
             <button type="button" class="reply-submit px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-xs font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reply</button>
             <p class="reply-error hidden text-xs text-red-500"></p>
-            <p class="reply-success hidden text-xs text-[var(--color-accent)]">Reply submitted, awaiting moderation.</p>
+            <p class="reply-success hidden text-xs text-green-600 dark:text-green-400">Reply submitted, awaiting moderation.</p>
           </div>
         </div>
       `;

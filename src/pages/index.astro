@@ -65,11 +65,12 @@ const websiteLd = {
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-end justify-between mb-10">
           <div>
-            <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">From the blog</p>
+            <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent-hover)] mb-2">From the blog</p>
             <h2 class="font-display text-2xl sm:text-3xl font-bold">Latest Posts</h2>
           </div>
           <a
             href="/blog"
+            aria-label="View all posts"
             class="group hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
           >
             View all
@@ -105,11 +106,12 @@ const websiteLd = {
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-end justify-between mb-10">
           <div>
-            <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">Things I've built</p>
+            <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent-hover)] mb-2">Things I've built</p>
             <h2 class="font-display text-2xl sm:text-3xl font-bold">Projects</h2>
           </div>
           <a
             href="/projects"
+            aria-label="View all projects"
             class="group hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] transition-colors"
           >
             View all
@@ -144,11 +146,11 @@ const websiteLd = {
   <section class="py-20 sm:py-24 section-alt">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-12">
-        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)] mb-2">What people say</p>
+        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent-hover)] mb-2">What people say</p>
         <h2 class="font-display text-2xl sm:text-3xl font-bold mb-3">Trusted by 40+ clients</h2>
         <div class="flex items-center justify-center gap-1">
           {[...Array(5)].map(() => (
-            <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+            <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
           ))}
           <span class="ml-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">25+ reviews</span>
         </div>

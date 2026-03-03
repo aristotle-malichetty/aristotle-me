@@ -27,7 +27,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
       <div class="mb-12">
         <div class="flex items-center gap-3 mb-4">
           <span class="inline-block w-8 h-[2px] bg-[var(--color-accent)]"></span>
-          <span class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent)]">Blog</span>
+          <span class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent-hover)]">Blog</span>
         </div>
         <h1 class="font-display text-4xl font-bold mb-4">Writing</h1>
         <p class="text-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] max-w-2xl">
@@ -40,7 +40,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
         <div class="flex flex-wrap gap-2 mb-10" id="tag-filters">
           <button
             data-tag="all"
-            class="tag-btn active px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)] cursor-pointer transition-all duration-200"
+            class="tag-btn active px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent-hover)] cursor-pointer transition-all duration-200"
           >
             All
           </button>
@@ -87,12 +87,12 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
 
     function selectTag(tag: string) {
       buttons.forEach((b) => {
-        b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+        b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent-hover)]');
         b.classList.add('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
       });
 
       const active = Array.from(buttons).find((b) => b.dataset.tag === tag) || buttons[0];
-      active.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+      active.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent-hover)]');
       active.classList.remove('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
 
       posts.forEach((post) => {

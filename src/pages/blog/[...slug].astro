@@ -175,6 +175,8 @@ const breadcrumbLd = {
               class="flex flex-col items-center gap-[11px] py-3 pr-3 group shrink-0"
               title="Toggle contents"
               aria-label="Toggle table of contents"
+              aria-expanded="true"
+              aria-controls="toc-card"
             >
               {tocHeadings.map(() => (
                 <span class="block w-4 h-[2.5px] rounded-full bg-[var(--color-text-secondary-light)]/25 dark:bg-[var(--color-text-secondary-dark)]/25 group-hover:bg-[var(--color-text-secondary-light)]/60 dark:group-hover:bg-[var(--color-text-secondary-dark)]/60 transition-colors duration-200" />
@@ -184,6 +186,7 @@ const breadcrumbLd = {
             <!-- TOC card -->
             <nav
               id="toc-card"
+              aria-label="Table of contents"
               class="w-[230px] py-4 px-5 rounded-xl bg-[var(--color-card-light)] border border-[var(--color-border-light)]"
             >
               <p class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-3.5">
@@ -247,7 +250,7 @@ const breadcrumbLd = {
       <CommentSection slug={post.id} turnstileSiteKey={turnstileSiteKey} />
 
       <!-- Prev/Next -->
-      <nav class="mt-10 pt-8 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] grid sm:grid-cols-2 gap-4">
+      <nav aria-label="Previous and next posts" class="mt-10 pt-8 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] grid sm:grid-cols-2 gap-4">
         {prevPost ? (
           <a
             href={`/blog/${prevPost.id}`}
@@ -282,6 +285,9 @@ const breadcrumbLd = {
   <div
     id="share-modal"
     class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="share-modal-title"
     aria-hidden="true"
     inert
   >
@@ -295,8 +301,8 @@ const breadcrumbLd = {
     >
       <!-- Header -->
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-lg font-semibold">Share this post</h2>
-        <button id="share-close" class="p-1.5 rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)] transition-colors">
+        <h2 id="share-modal-title" class="text-lg font-semibold">Share this post</h2>
+        <button id="share-close" class="p-1.5 rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)] transition-colors" aria-label="Close">
           <XIcon class="w-5 h-5" />
         </button>
       </div>
@@ -368,6 +374,8 @@ const breadcrumbLd = {
         id="mobile-toc-btn"
         class="fixed bottom-6 right-4 z-50 xl:hidden w-12 h-12 flex items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-lg hover:bg-[var(--color-accent-hover)] transition-colors"
         aria-label="Table of contents"
+        aria-expanded="false"
+        aria-controls="mobile-toc-overlay"
       >
         <List class="w-5 h-5" />
       </button>
@@ -376,6 +384,9 @@ const breadcrumbLd = {
       <div
         id="mobile-toc-overlay"
         class="fixed inset-0 z-[100] xl:hidden opacity-0 pointer-events-none transition-opacity duration-200"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Table of contents"
         aria-hidden="true"
         inert
       >
@@ -392,13 +403,13 @@ const breadcrumbLd = {
             <p class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
               Contents
             </p>
-            <button id="mobile-toc-close" class="p-1.5 rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)] transition-colors">
+            <button id="mobile-toc-close" class="p-1.5 rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)] transition-colors" aria-label="Close">
               <XIcon class="w-5 h-5" />
             </button>
           </div>
 
           {/* Links */}
-          <nav class="overflow-y-auto overscroll-contain px-5 py-4">
+          <nav aria-label="Table of contents" class="overflow-y-auto overscroll-contain px-5 py-4">
             <ul class="space-y-0.5">
               {tocHeadings.map((heading) => (
                 <li>
@@ -471,6 +482,8 @@ const breadcrumbLd = {
 
       toggle.addEventListener('click', () => {
         card.classList.toggle('collapsed');
+        const isExpanded = !card.classList.contains('collapsed');
+        toggle.setAttribute('aria-expanded', String(isExpanded));
       });
     }
 
@@ -489,6 +502,7 @@ const breadcrumbLd = {
         overlay!.setAttribute('aria-hidden', 'false');
         overlay!.removeAttribute('inert');
         sheet!.classList.remove('mobile-toc-sheet-hidden');
+        btn!.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
       }
 
@@ -498,6 +512,7 @@ const breadcrumbLd = {
         overlay!.setAttribute('aria-hidden', 'true');
         overlay!.setAttribute('inert', '');
         sheet!.classList.add('mobile-toc-sheet-hidden');
+        btn!.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
       }
 
