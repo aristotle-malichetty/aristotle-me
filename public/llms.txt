@@ -4,7 +4,7 @@
 
 Aris has a Master's in Business Analytics from the University of New Haven. He builds APIs, automation tools, Chrome extensions, and full-stack apps. He works with 40+ clients across healthcare, e-commerce, SaaS, and creator economy on analytics, dashboards, lead generation, and go-to-market strategy.
 
-He operates under Xen AI LLC and uses Claude Code and Cursor daily to ship software.
+He uses Claude Code and Cursor daily to ship software.
 
 ## Blog Posts
 - [Why I Moved Away from WordPress (And What I Use Now)](https://aristotle.me/blog/why-i-moved-away-from-wordpress): Two years on WordPress, then switching to Astro + Cloudflare Pages. What broke and what got better.
