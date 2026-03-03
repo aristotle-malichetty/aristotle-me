@@ -43,6 +43,7 @@ Thumbs.db
 
 # wrangler
 .wrangler/
+wrangler.jsonc
 
 # Docs
 .docs/

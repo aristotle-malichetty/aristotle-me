@@ -7,6 +7,8 @@ import sitemap from '@astrojs/sitemap';
 import keystatic from '@keystatic/astro';
 import cloudflare from '@astrojs/cloudflare';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export default defineConfig({
   site: 'https://aristotle.me',
   output: 'server',
@@ -23,7 +25,7 @@ export default defineConfig({
     sitemap({
       filter: (page) => !page.includes('/keystatic') && !page.includes('/admin'),
     }),
-    keystatic(),
+    ...(isDev ? [keystatic()] : []),
   ],
   vite: {
     plugins: [tailwindcss()],
