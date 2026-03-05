@@ -1,6 +1,6 @@
 ---
-title: I Built aristotle.me in 6 Hours. Here's Every Mistake I Made.
-description: I almost shipped an XSS vulnerability on day one. Here's every decision, mistake, and deleted feature from building aristotle.me with Claude Code.
+title: I Built My Own Substack in 2 Days
+description: Substack gives you a blog, comments, SEO, and share cards for free. I rebuilt all of it from scratch with Claude Code. Here's what broke.
 date: 2026-02-27
 tags:
   - Web Development
@@ -10,27 +10,33 @@ tags:
 featured: true
 ---
 
-I almost shipped a security vulnerability on day one.
+Substack gives you a blog, comments, SEO, and share cards for free.
 
-The comment system worked. Threaded replies, real-time loading, Cloudflare D1 for storage. Everything looked great. Then I realized I was injecting user input straight into `innerHTML` without escaping it.
+I rebuilt all of it from scratch.
 
-If someone typed `<script>alert('hi')</script>` as their name, it would execute. Classic XSS. On a brand new site. Built with AI.
+Not because Substack is bad. Because I wanted to own every line. Write, publish, and manage everything from my terminal with Claude Code. No dashboard. No browser. Just code.
 
-That's the kind of stuff you don't see in "I built this in 6 hours" posts. So I'm going to show you all of it. The decisions, the mistakes, the things I built and then deleted.
+That decision almost cost me my entire site on day one.
 
-Here's how aristotle.me actually came together.
+Here's every feature I had to replace, every mistake I made, and the security hole that could have given a stranger full access to my GitHub.
 
-## The Spec Came Before the Code
+## What I Was Actually Replacing
 
-I wrote about why I left WordPress in a [separate post](/blog/why-i-moved-away-from-wordpress). Short version: I use Claude Code every day but never touched my WordPress dashboard. So I rebuilt the whole site in a stack I can manage from my terminal.
+Before writing code, I listed what Substack actually gives you.
 
-But I didn't just open my editor and start typing. I started in Claude's conversation UI (not Claude Code) and talked through everything first. What pages I need. What the content schemas should look like. Design direction. Deployment config.
+Blog with reading time and share buttons. Comment threads. SEO meta tags and structured data. Social share images. Image optimization. A clean reading experience.
+
+That's a lot of free infrastructure. You can see why most writers just use it.
+
+I wrote about [why I left WordPress](/blog/why-i-moved-away-from-wordpress) in a separate post. Short version: I use Claude Code every day but never touched my WordPress dashboard. So I needed a stack I could manage from my terminal.
+
+I didn't just open my editor and start typing. I started in Claude's conversation UI (not Claude Code) and talked through everything first. What pages I need. What the content schemas should look like. Design direction. Deployment config.
 
 By the end of that conversation, I had a full product spec.
 
 Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project. Astro setup, Keystatic config, pages, components, SEO, Cloudflare deployment. All from one spec.
 
-From there, I iterated. That's where the real work started.
+The basic scaffold came together fast. Getting everything production-ready took the rest of those two days.
 
 ![The build spec Claude generated. Every page, tool, and design decision mapped out before writing a single line of code.](../../assets/images/blog/claude-build-spec.jpg)
 
@@ -48,9 +54,9 @@ Two reasons.
 
 I committed locally after every feature, every fix, every refactor. Not to push anywhere. Just to save my progress. It costs nothing and it's saved me more than once.
 
-## I Basically Copied Substack's Blog Layout
+## Cloning Substack's Blog Layout
 
-I wanted the blog to feel premium. Clean. Like reading something on Substack or Medium. Not a developer's default markdown page.
+If you're going to replace Substack, the reading experience has to be at least as good.
 
 So I studied how Substack does it. Reading time at the top, comment count, share buttons. I took that structure and ran with it. Time to read, share icons (almost straight from Substack), and a table of contents on the side that scrolls with you and collapses when you click it.
 
@@ -62,7 +68,7 @@ So I studied how Substack does it. Reading time at the top, comment count, share
 
 ![A typical Substack post for comparison. Same structure: title, subtitle, author row, engagement bar, sticky TOC on the left.](../../assets/images/blog/blog-layout-substack.png)
 
-The goal: make it feel like a real blog. Not a side project.
+Side by side, they're close. That was the goal.
 
 ### The Mobile TOC Problem
 
@@ -78,7 +84,9 @@ Moving `overflow-x: clip` to `body` fixed it. Small CSS bug. Took way too long t
 
 ## Building My Own Comment System
 
-I wanted comments. Claude Code gave me three options.
+Substack gives you threaded comments for free. I had to build mine.
+
+Claude Code gave me three options.
 
 **Giscus.** Powered by GitHub Discussions. Free, open source. But readers need a GitHub account to comment. Most of my visitors aren't developers. Too much friction. Rejected immediately.
 
@@ -110,7 +118,7 @@ Managing two Turnstile instances on the same page was more annoying than buildin
 
 ## The XSS I Almost Shipped
 
-I mentioned this at the top. Here's the full story.
+Remember the security hole I mentioned? Here's the full story.
 
 The comment form takes a name and a message. I was putting that text directly into the page without cleaning it first. No filtering. So if someone types actual code instead of their name, the browser doesn't know the difference. It treats it as part of the website and runs it.
 
@@ -120,11 +128,13 @@ The real risk was me. I use Keystatic with GitHub OAuth to manage this site. If 
 
 The fix took two minutes. A small function that converts special characters into safe text before displaying them. Applied it everywhere user content touches the page.
 
-But here's the lesson. When you build with AI, the code comes fast. Really fast. It's easy to trust it because it "works." You still have to check what happens when real people type things you didn't expect. AI tools are fast. They're not infallible.
+On Substack, someone else worries about this. When you own the stack, you catch these yourself. AI tools write code fast. They're not checking for people typing malicious HTML into your comment form.
 
 ## The Design Was Ugly (Until Playwright MCP Fixed It)
 
-After building everything, I installed Playwright MCP into my Claude Code workflow. This lets Claude Code actually *see* the UI in a real browser. Not just the code. The actual rendered page.
+Substack at least gives you a decent default. My first version wasn't even that.
+
+I installed Playwright MCP into my Claude Code workflow. This lets Claude Code actually *see* the UI in a real browser. Not just the code. The actual rendered page.
 
 I told it to go through the whole site and tell me what could be improved.
 
@@ -166,7 +176,7 @@ After publishing, I opened DevTools. Checked the network tab.
 
 The blog images were loading as raw PNGs and JPGs from the `public/` folder. No compression. No responsive sizing. No WebP. One screenshot was 1.4MB.
 
-For a site that's supposed to be fast, that's embarrassing.
+Substack handles image optimization automatically. On my custom build, I was serving raw screenshots like it was 2008.
 
 Astro has a built-in `<Image>` component that handles WebP conversion, responsive `srcset`, lazy loading, and layout shift prevention. But it only works on images that go through Vite's build pipeline. They need to live in `src/`, not `public/`.
 
@@ -192,13 +202,13 @@ The initial build is never done. The best improvements come from actually using 
 
 ## SEO You Don't Notice Until It's Missing
 
-After fixing images, I compared my site to what WordPress + Rank Math gives you out of the box.
+After fixing images, I compared my site to what Substack and WordPress give you out of the box.
 
 I was missing a lot. No `twitter:creator` tag. No `article:modified_time`. No structured data beyond basic BlogPosting. No breadcrumbs in Google results.
 
 The biggest gap: no social share images. Every time someone shared a post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
 
-WordPress plugins generate all of this automatically. On a custom stack, you build it yourself.
+Substack and WordPress plugins generate all of this automatically. On a custom stack, you build it yourself.
 
 ### OG Images That Don't Look Auto-Generated
 
@@ -226,20 +236,43 @@ Also, satori doesn't support woff2 fonts. Google Fonts serves woff2 by default. 
 
 ### Everything Else I Was Missing
 
-Beyond OG images, I added Twitter meta tags so posts link back to my account, `article:modified_time` for blog posts, Person and WebSite JSON-LD on the homepage for Knowledge Panels, BreadcrumbList JSON-LD for breadcrumb snippets in search results, and enhanced BlogPosting schema with `image`, `wordCount`, and `publisher` fields. Fixed up the RSS feed with proper author and category info too.
+Beyond OG images, I added Twitter meta tags so posts link back to my account. `article:modified_time` for blog posts. Person and WebSite JSON-LD on the homepage for Knowledge Panels. BreadcrumbList JSON-LD for breadcrumb snippets in search results. Enhanced BlogPosting schema with `image`, `wordCount`, and `publisher` fields. Fixed up the RSS feed with proper author and category info too.
 
 The share modal also got an upgrade. It used to show a gradient placeholder when a post had no cover image. Now it shows the actual generated OG image. What you see in the modal is exactly what people see when they click your link.
 
 None of this changes how the site looks. But it's the difference between a bare URL and a branded card when someone shares your post.
 
+## Perfect 100s on Lighthouse
+
+After deploying, I ran Google Lighthouse on every page.
+
+Not perfect. Blog posts scored 96 on accessibility and best practices. Some pages had contrast issues, heading order problems, and API errors showing up in the console.
+
+I told Claude Code to fix everything Lighthouse flagged. It read the audit results, found the problems across seven files, and fixed them in one pass.
+
+After redeploying, every page hit 100/100/100/100 on desktop. Performance, accessibility, best practices, SEO. All maxed out.
+
+| Page | Performance | Accessibility | Best Practices | SEO |
+|---|---|---|---|---|
+| Blog posts (before) | 96 | 100 | 96 | 100 |
+| Blog posts (after) | 100 | 100 | 100 | 100 |
+| Contact (before) | 100 | 98 | 100 | 100 |
+| Contact (after) | 100 | 100 | 100 | 100 |
+
+Mobile blog posts land at 98-99 on performance because Lighthouse simulates a slow 4G connection. That last point would mean inlining critical CSS. Not worth the complexity for a simulated edge case.
+
+Substack doesn't make you think about Lighthouse scores. But when you share your site in a job application or a client pitch, those numbers say something. They say you care about the details, not just the features.
+
 ## The Numbers
 
-6 hours of build time. Sub-500ms page loads on a global CDN. $0/month hosting. Zero plugins beyond core Astro integrations.
+About 2 days of actual build time, spread across 5 calendar days between other projects. Sub-500ms page loads on a global CDN. $0/month hosting. Perfect 100s on every Lighthouse category. Zero plugins beyond core Astro integrations.
 
 The site is open source: [github.com/aristotlem/aristotle-me](https://github.com/aristotlem/aristotle-me)
 
 ---
 
-The code was the easy part. The hard part was knowing what to say, what to cut, and when to stop tweaking.
+Substack would have been easier. Sign up, write, publish. No deployment config, no CSS bugs at midnight.
 
-I'm working on a few other things right now. Including a [UFC Fighter Quiz](/projects) that matches you to a real fighter based on your fighting style. Five questions, weighted style profiles, live stats from my UFC API. Go find your alter ego.
+But I own every line of this. The layout, the comments, the SEO, the share cards. No platform can change the rules on me. No pricing update can lock me out.
+
+More work. More yours.

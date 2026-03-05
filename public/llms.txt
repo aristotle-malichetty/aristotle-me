@@ -8,7 +8,7 @@ He uses Claude Code and Cursor daily to ship software.
 
 ## Blog Posts
 - [Why I Moved Away from WordPress (And What I Use Now)](https://aristotle.me/blog/why-i-moved-away-from-wordpress): Two years on WordPress, then switching to Astro + Cloudflare Pages. What broke and what got better.
-- [I Built aristotle.me in 6 Hours. Here's Every Mistake I Made.](https://aristotle.me/blog/building-aristotle-me): Every decision, mistake, and deleted feature from building aristotle.me with Claude Code.
+- [I Built My Own Substack in 2 Days](https://aristotle.me/blog/built-my-own-substack): Every decision, mistake, and deleted feature from building aristotle.me with Claude Code.
 
 ## Pages
 - [About](https://aristotle.me/about): Bio, skills, clients, current projects, and tech stack.
