@@ -172,11 +172,11 @@ I told Claude Code to fix this. It restructured how images flow through the buil
 
 The initial build is never done. The best improvements come from actually using your site and noticing what's slow.
 
-## SEO You Don't Notice Until It's Missing
+## SEO for Google and AI Search
 
-After fixing images, I compared my site to what Substack and WordPress give you out of the box. I was missing a lot.
+After fixing images, I compared my site to what Substack and WordPress give you out of the box. I was missing a lot. Not just traditional SEO. AI search too. ChatGPT, Perplexity, Claude. These tools are answering questions now, and they need to know your site exists.
 
-The biggest gap: no social share images. Every time someone shared a post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
+The biggest gap on the traditional side: no social share images. Every time someone shared a post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
 
 Substack generates all of this automatically. On a custom stack, you build it yourself.
 
@@ -198,11 +198,13 @@ So I iterated. Swapped in my pixel art avatar. Added the post description. Unifi
 
 The difference between "auto-generated" and "intentional" is usually just a few design decisions.
 
-### Everything Else I Was Missing
+### Structured Data, Meta Tags, and llms.txt
 
 Beyond OG images, I added proper Twitter tags, structured data for Google's Knowledge Panels and breadcrumbs, and fixed the RSS feed. The share modal now shows the actual OG image instead of a placeholder.
 
-None of this changes how the site looks. But it's the difference between a bare URL and a branded card when someone shares your post.
+Then I added an `llms.txt` file. It's a growing standard that tells AI models what your site is about and how it's structured. Think of it like `robots.txt` but for ChatGPT, Perplexity, and Claude instead of Google's crawler.
+
+None of this changes how the site looks. But it's the difference between a bare URL and a branded card when someone shares your post. And the difference between AI search knowing your site exists or not.
 
 ## Perfect 100s on Lighthouse
 
