@@ -70,33 +70,19 @@ So I studied how Substack does it. Reading time at the top, comment count, share
 
 Side by side, they're close. That was the goal.
 
-### The Mobile TOC Problem
+### Mobile Table of Contents (Substack Doesn't Have One)
 
-Desktop TOC works great. Sticky sidebar, collapse toggle, active section highlighting. But it only shows at 1280px and above. On mobile, you just scroll. For a post with 15 sections, that's a lot of blind scrolling.
+Desktop table of contents works great. Sticky sidebar, collapse toggle, highlights the section you're reading. But on mobile, it disappears. For a post with 15 sections, that's a lot of blind scrolling. Substack doesn't solve this either.
 
-I added a floating button in the bottom-right corner. Tap it, a bottom sheet opens with the full section list. Tap a section, it smooth scrolls there, sheet closes.
-
-The same IntersectionObserver that drives the desktop TOC drives the mobile one. Both use the same `data-toc-link` attributes. One observer, two UIs.
-
-Here's the annoying part. I'd set `overflow-x: clip` on `html` earlier to stop the desktop TOC from causing horizontal scroll. But `clip` on `html` also clips `position: fixed` elements. So the floating button was half-visible, cut off at the edge.
-
-Moving `overflow-x: clip` to `body` fixed it. Small CSS bug. Took way too long to find.
+I added a floating button in the bottom-right corner. Tap it, a bottom sheet slides up with every section listed. Tap one, smooth scroll, sheet closes. Small addition. Big difference in usability.
 
 ## Building My Own Comment System
 
 Substack gives you threaded comments for free. I had to build mine.
 
-Claude Code gave me three options.
+I looked at open source options. Giscus requires a GitHub account to comment. Most of my readers aren't developers. Cusdis looked promising but their own site wouldn't even load. Not a great sign for a dependency.
 
-**Giscus.** Powered by GitHub Discussions. Free, open source. But readers need a GitHub account to comment. Most of my visitors aren't developers. Too much friction. Rejected immediately.
-
-**Cusdis.** Lightweight, open source. I tried to check out their site and it wouldn't even load. Probably my ad blocker. Not a great sign for a tool I'd depend on.
-
-**Build my own.** Cloudflare D1 (SQLite) + Workers. Full control.
-
-I'd already used D1 on other projects, so I knew how it worked. And Cloudflare's Turnstile (their free invisible CAPTCHA) handles bot protection well. So I built my own.
-
-The setup: D1 for storage, Turnstile for spam protection, honeypot fields that bots fill out and humans never see. Plus rate limiting at 5 comments per 10 minutes per IP, content-based spam filtering, and threaded replies.
+So I built my own. Cloudflare D1 for storage, Turnstile for spam protection, honeypot fields, rate limiting, and threaded replies. Full control.
 
 ### The Reply UX I Got Wrong
 
@@ -108,11 +94,7 @@ I rebuilt it. Now clicking "Reply" opens an inline form right below that comment
 
 Much better.
 
-### Two Turnstile Widgets on One Page
-
-Each comment form needs its own Turnstile widget. The main form has one. When someone clicks "Reply," a second widget renders in the inline reply form.
-
-Managing two Turnstile instances on the same page was more annoying than building the comment storage itself. Initializing them, resetting after submission, cleaning up when the reply form closes. It works. But it was the most frustrating part of the entire build.
+Managing Turnstile's spam protection across two forms on the same page (the main form and inline reply form) was more frustrating than building the comment storage itself. It works. But it was the most annoying part of the entire build.
 
 ![The comment system. Turnstile widget, threaded replies, inline reply form. More work than it looks.](../../assets/images/blog/comment-system.png)
 
@@ -120,15 +102,13 @@ Managing two Turnstile instances on the same page was more annoying than buildin
 
 Remember the security hole I mentioned? Here's the full story.
 
-The comment form takes a name and a message. I was putting that text directly into the page without cleaning it first. No filtering. So if someone types actual code instead of their name, the browser doesn't know the difference. It treats it as part of the website and runs it.
+The comment form takes a name and a message. I was putting that text directly into the page without cleaning it first. So if someone types code instead of their name, the browser treats it as part of the website and runs it.
 
-For a random visitor reading my blog, the damage is limited. They don't have accounts on my site. No login sessions. But someone could still redirect them to a phishing page, inject fake content, or run a crypto miner in their browser.
+The real risk was me. I use GitHub OAuth to manage this site. If I'm logged in and view a malicious comment, that script runs with my auth tokens. Someone could grab my GitHub token, push code to my repo, and since Cloudflare auto-deploys from GitHub, they'd own my entire site. Through my own comment section.
 
-The real risk was me. I use Keystatic with GitHub OAuth to manage this site. If I'm logged in and view a malicious comment, that script runs in my browser with my auth tokens. Someone could grab my GitHub token, push code to my repo, and since Cloudflare auto-deploys from GitHub, they'd own my entire site. Through my own comment section.
+The fix took two minutes. But finding it took longer.
 
-The fix took two minutes. A small function that converts special characters into safe text before displaying them. Applied it everywhere user content touches the page.
-
-On Substack, someone else worries about this. When you own the stack, you catch these yourself. AI tools write code fast. They're not checking for people typing malicious HTML into your comment form.
+On Substack, someone else worries about this. When you own the stack, you catch these yourself. AI tools write code fast. They don't always write it safe.
 
 ## The Design Was Ugly (Until Playwright MCP Fixed It)
 
@@ -172,21 +152,13 @@ Zero code changed. More impact than any technical feature I shipped.
 
 ## 3.1MB of Images on a "Fast" Site
 
-After publishing, I opened DevTools. Checked the network tab.
+After publishing, I checked the network tab. The blog images were loading as raw PNGs and JPGs. No compression. No responsive sizing. One screenshot was 1.4MB.
 
-The blog images were loading as raw PNGs and JPGs from the `public/` folder. No compression. No responsive sizing. No WebP. One screenshot was 1.4MB.
+Substack handles image optimization automatically. I was serving raw screenshots like it was 2008.
 
-Substack handles image optimization automatically. On my custom build, I was serving raw screenshots like it was 2008.
+Astro has a built-in image component that handles compression, format conversion, and responsive sizing automatically. I just wasn't using it.
 
-Astro has a built-in `<Image>` component that handles WebP conversion, responsive `srcset`, lazy loading, and layout shift prevention. But it only works on images that go through Vite's build pipeline. They need to live in `src/`, not `public/`.
-
-I told Claude Code to fix this. It entered plan mode, read the Astro and Markdoc docs, explored the codebase, and came back with an 8-step plan.
-
-The tricky part wasn't moving files around. It was making Markdoc's image rendering use Astro's `<Image>` component instead of plain `<img>` tags. And keeping Keystatic's image uploads working with the right relative paths.
-
-The fix touched eight files. Custom Markdoc image node, Astro component with external URL fallback, updated content schemas, Keystatic config changes, and the blog post template.
-
-Here's what happened to the file sizes:
+I told Claude Code to fix this. It restructured how images flow through the build pipeline. Here's what happened to the file sizes:
 
 | Image | Before | After (480w) | After (1024w) | Reduction |
 |---|---|---|---|---|
@@ -202,23 +174,19 @@ The initial build is never done. The best improvements come from actually using 
 
 ## SEO You Don't Notice Until It's Missing
 
-After fixing images, I compared my site to what Substack and WordPress give you out of the box.
-
-I was missing a lot. No `twitter:creator` tag. No `article:modified_time`. No structured data beyond basic BlogPosting. No breadcrumbs in Google results.
+After fixing images, I compared my site to what Substack and WordPress give you out of the box. I was missing a lot.
 
 The biggest gap: no social share images. Every time someone shared a post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
 
-Substack and WordPress plugins generate all of this automatically. On a custom stack, you build it yourself.
+Substack generates all of this automatically. On a custom stack, you build it yourself.
 
 ### OG Images That Don't Look Auto-Generated
 
-I didn't want to design a share image every time I publish. So I built a system that generates them at build time. Every post gets a branded 1200x630 PNG automatically.
+I didn't want to design a share image every time I publish. So I built a system that generates them automatically at build time. Every post gets a branded 1200x630 PNG.
 
-The tools: **satori** (the same engine behind Vercel's OG images, converts markup to SVG) and **@resvg/resvg-js** (SVG to PNG). Both run at build time. They're static files by the time they hit Cloudflare.
+First version was bland. Blue rectangle, white text, "AM" circle in the corner. Looked like every other auto-generated share card on the internet.
 
-First version was bland. Blue rectangle, white text, "AM" circle in the corner. Looked like every other auto-generated OG image on the internet.
-
-So I iterated. Swapped in my pixel art avatar. Added the post description. Unified the branding. Added a gradient. Anchored content to the bottom.
+So I iterated. Swapped in my pixel art avatar. Added the post description. Unified the branding.
 
 **Before:**
 
@@ -230,15 +198,9 @@ So I iterated. Swapped in my pixel art avatar. Added the post description. Unifi
 
 The difference between "auto-generated" and "intentional" is usually just a few design decisions.
 
-Btw, two things tripped me up here. Resvg uses native Node.js bindings, and Vite's bundler tried to process the `.node` file during the Cloudflare build. Crashed with "Unexpected character" errors. Fix: add `@resvg/resvg-js` to `vite.ssr.external` so Rollup leaves it alone.
-
-Also, satori doesn't support woff2 fonts. Google Fonts serves woff2 by default. I had to fake an old IE User-Agent in the font fetch to get TTF format instead. Weird hack. Works perfectly.
-
 ### Everything Else I Was Missing
 
-Beyond OG images, I added Twitter meta tags so posts link back to my account. `article:modified_time` for blog posts. Person and WebSite JSON-LD on the homepage for Knowledge Panels. BreadcrumbList JSON-LD for breadcrumb snippets in search results. Enhanced BlogPosting schema with `image`, `wordCount`, and `publisher` fields. Fixed up the RSS feed with proper author and category info too.
-
-The share modal also got an upgrade. It used to show a gradient placeholder when a post had no cover image. Now it shows the actual generated OG image. What you see in the modal is exactly what people see when they click your link.
+Beyond OG images, I added proper Twitter tags, structured data for Google's Knowledge Panels and breadcrumbs, and fixed the RSS feed. The share modal now shows the actual OG image instead of a placeholder.
 
 None of this changes how the site looks. But it's the difference between a bare URL and a branded card when someone shares your post.
 
@@ -246,20 +208,9 @@ None of this changes how the site looks. But it's the difference between a bare 
 
 After deploying, I ran Google Lighthouse on every page.
 
-Not perfect. Blog posts scored 96 on accessibility and best practices. Some pages had contrast issues, heading order problems, and API errors showing up in the console.
+Not perfect on the first run. Blog posts scored 96 on accessibility and best practices. Contrast issues, heading order problems, console errors.
 
-I told Claude Code to fix everything Lighthouse flagged. It read the audit results, found the problems across seven files, and fixed them in one pass.
-
-After redeploying, every page hit 100/100/100/100 on desktop. Performance, accessibility, best practices, SEO. All maxed out.
-
-| Page | Performance | Accessibility | Best Practices | SEO |
-|---|---|---|---|---|
-| Blog posts (before) | 96 | 100 | 96 | 100 |
-| Blog posts (after) | 100 | 100 | 100 | 100 |
-| Contact (before) | 100 | 98 | 100 | 100 |
-| Contact (after) | 100 | 100 | 100 | 100 |
-
-Mobile blog posts land at 98-99 on performance because Lighthouse simulates a slow 4G connection. That last point would mean inlining critical CSS. Not worth the complexity for a simulated edge case.
+I told Claude Code to fix everything Lighthouse flagged. One pass. After redeploying, every page hit 100/100/100/100 on desktop. Performance, accessibility, best practices, SEO. All maxed out.
 
 Substack doesn't make you think about Lighthouse scores. But when you share your site in a job application or a client pitch, those numbers say something. They say you care about the details, not just the features.
 
