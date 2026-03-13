@@ -7,8 +7,6 @@ import sitemap from '@astrojs/sitemap';
 import keystatic from '@keystatic/astro';
 import cloudflare from '@astrojs/cloudflare';
 
-import partytown from '@astrojs/partytown';
-
 const isDev = process.env.NODE_ENV !== 'production';
 
 export default defineConfig({
@@ -23,11 +21,7 @@ export default defineConfig({
   },
   integrations: [react(), markdoc(), sitemap({
     filter: (page) => !page.includes('/keystatic') && !page.includes('/admin'),
-  }), ...(isDev ? [keystatic()] : []), partytown({
-      config: {
-        forward: ['dataLayer.push'],
-      },
-    })],
+  }), ...(isDev ? [keystatic()] : [])],
   vite: {
     plugins: [tailwindcss()],
     ssr: {
