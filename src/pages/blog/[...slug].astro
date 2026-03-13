@@ -37,6 +37,15 @@ const formattedDate = post.data.date.toLocaleDateString('en-US', {
   timeZone: 'UTC',
 });
 
+const effectiveUpdatedDate = post.data.updatedDate || post.data.date;
+const formattedUpdatedDate = effectiveUpdatedDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+const showUpdatedDate = effectiveUpdatedDate.getTime() !== post.data.date.getTime();
+
 const tocHeadings = headings.filter((h) => h.depth <= 3);
 const postUrl = `https://aristotle.me/blog/${post.id}`;
 
@@ -48,7 +57,7 @@ const jsonLd = {
   headline: post.data.title,
   description: post.data.description,
   datePublished: post.data.date.toISOString(),
-  ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+  dateModified: effectiveUpdatedDate.toISOString(),
   image: `https://aristotle.me${ogImage}`,
   wordCount,
   inLanguage: 'en',
@@ -130,6 +139,14 @@ const breadcrumbLd = {
             <span class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{readingTime}</span>
             <span class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">&middot;</span>
             <time datetime={post.data.date.toISOString()} class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{formattedDate}</time>
+            {showUpdatedDate && (
+              <>
+                <span class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">&middot;</span>
+                <span class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                  Updated <time datetime={effectiveUpdatedDate.toISOString()}>{formattedUpdatedDate}</time>
+                </span>
+              </>
+            )}
           </div>
         </div>
 
