@@ -1,0 +1,170 @@
+---
+title: I Got Perfect 100s on Lighthouse. Then I Added Google Tag Manager.
+description: Four perfect scores on every page. Then one script tag broke everything. Here's how I fixed it without removing GTM.
+date: 2026-03-13
+tags:
+  - Web Development
+  - SEO
+  - Astro
+  - Building in Public
+draft: false
+---
+
+Four 100s on every page.
+
+Performance. Accessibility. Best Practices. SEO. All green. All maxed out.
+
+I ran the audit, screenshot it, and moved on to other things. The site was done. Lighthouse said so.
+
+Then I added Google Tag Manager. One script tag in the `<head>`. The standard snippet Google gives you.
+
+Performance dropped to 85. Best Practices dropped to 92. Two scores I'd spent hours fixing, gone in one paste.
+
+Here's how I got them back without removing GTM.
+
+## The Scores Before GTM
+
+I built [aristotle.me with Astro and Cloudflare Pages](/blog/built-my-own-substack). After the initial build, I ran a full Lighthouse audit. Found 4 problems.
+
+**Heading order.** Some pages jumped from `h1` to `h3`, skipping `h2`. Lighthouse hates that. Quick fix. Changed the tags.
+
+**TOC contrast.** My table of contents links used `opacity: 0.7` on a secondary color. The math didn't work. The contrast ratio dropped below 4.5:1. Removed the opacity. Done.
+
+**OG image loading.** The share modal had a full-size OG image (143KB PNG) loading immediately, even though the modal was hidden. Added `loading="lazy"` and `fetchpriority="low"`. Problem solved.
+
+**Comments API error.** My comments system calls a Cloudflare D1 database. When the database wasn't available, it threw a 500 error. Lighthouse counted that as a console error. Added a null check to return an empty array instead.
+
+Four fixes. Every page hit 100/100/100/100.
+
+That lasted about 10 days.
+
+## Then I Added One Script Tag
+
+I needed analytics. Not optional. I'm building products and need to know what's working. GTM lets me manage GA4, pixels, and any future tracking from one dashboard.
+
+So I added the standard GTM snippet to my Astro layout. The exact code Google tells you to use.
+
+Largest Contentful Paint jumped to 4.3 seconds. Performance score: 85.
+
+The problem is simple. GTM loads synchronously in the `<head>`. Your browser can't paint anything until that script downloads and executes. On a fast connection, you barely notice. On Lighthouse's simulated slow 4G, it's brutal.
+
+## CSP: The Error Nobody Warns You About
+
+But performance wasn't even the first problem. GTM wasn't firing at all.
+
+I opened Google Tag Assistant. It said: "Content Security Policy blocking Google scripts."
+
+My site has a `_headers` file with strict security rules. The Content-Security-Policy header controls what scripts, fonts, images, and connections your site is allowed to make. I'd set it up to only allow scripts from my own domain and Cloudflare's challenge platform.
+
+GTM? Blocked.
+
+First fix: add `googletagmanager.com` to `script-src`. Deployed. Still broken.
+
+Second fix: add `googletagmanager.com` to `connect-src` too. GTM doesn't just load a script. It makes network requests back to Google. Both directives need the domain.
+
+If you're adding GTM to a site with CSP headers, you need it in both `script-src` AND `connect-src`. Plus the Google Analytics domains for the actual data to flow. Nobody mentions this in the GTM setup docs.
+
+After the CSP fixes, Tag Assistant showed a new message: "Ad blocker may be blocking tags." That was my browser extension, not a code problem. Opened an incognito window. GTM fired fine.
+
+## I Tried Astro's Official Fix
+
+Performance was still tanked from GTM loading in the `<head>`. I looked into how Astro recommends handling third-party scripts.
+
+Their answer: **Partytown**. It's an official Astro integration that moves scripts off the main thread into a web worker. Your page renders fast. The scripts still run. Just not on the main thread.
+
+Setup was easy. Install the package, add `forward: ['dataLayer.push']` to the config, change your GTM script from `is:inline` to `type="text/partytown"`.
+
+Performance came back. Score went from 85 to 98.
+
+But Best Practices dropped to 81.
+
+Partytown runs scripts inside a sandboxed iframe. That iframe triggered Chrome's deprecated API warnings for `SharedStorage` and `AttributionReporting`. These are Privacy Sandbox APIs that Partytown touches internally. Not my code. Not GTM's code. Partytown's sandbox.
+
+I even checked what Astro's own website uses for analytics. Not GTM. Not GA4. **Fathom Analytics.** A tiny, privacy-focused script with zero performance impact. Their own framework's official recommendation (Partytown) has known issues, and they don't even use it themselves.
+
+## The Fix That Actually Worked
+
+I ripped out Partytown and went simple.
+
+Instead of loading GTM immediately, I delay it until the page is done loading. One `window.addEventListener('load', ...)` wrapper around the GTM snippet. That's it.
+
+```javascript
+window.addEventListener('load', function() {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+  var j = document.createElement('script');
+  j.async = true;
+  j.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-XXXXXXX';
+  document.head.appendChild(j);
+});
+```
+
+GTM loads after the page renders. No Partytown iframe. No deprecated API warnings. No main thread blocking.
+
+The tradeoff: you miss events from the first 1-2 seconds after page load. But think about what happens in those 1-2 seconds. The page is still rendering. The user is reading. Nobody's clicking a CTA before they even see it.
+
+Performance: 99. Best Practices: 100. GTM still works. All pixels still fire.
+
+## The Dark Mode Contrast Rabbit Hole
+
+While fixing GTM, Lighthouse flagged another issue. My accent color (#2563eb, a medium blue) didn't have enough contrast on dark backgrounds.
+
+The math: #2563eb on #0a0a0a gives you 3.83:1. You need 4.5:1 for WCAG AA compliance. Fine on light backgrounds. Fails on dark.
+
+Simple fix, right? Make the blue brighter in dark mode. I added a CSS override:
+
+```css
+.dark {
+  --color-accent: #60a5fa;
+  --color-accent-hover: #3b82f6;
+}
+```
+
+Accessibility went up. Then I checked the buttons.
+
+White text on #60a5fa gives you 2.54:1 contrast. Even worse than before. The brighter blue is great for text on dark backgrounds. Terrible as a background for white text.
+
+You can't win both ways with one color. The math literally doesn't allow it. A blue that's bright enough for dark backgrounds is too bright for white text on top of it.
+
+The fix: use the bright blue for text, keep the original darker blue for button backgrounds. Two different values for two different jobs.
+
+```css
+/* Buttons in dark mode get the original, darker accent */
+class="bg-[var(--color-accent)] dark:bg-[#2563eb] text-white"
+```
+
+Seven elements across six files. Each one needed the override.
+
+## Where the Scores Are Now
+
+Here's the before and after.
+
+**Before GTM (March 3):**
+
+Every page: 100/100/100/100. Blog posts: 98-99 on mobile performance (simulated slow 4G ceiling).
+
+**After GTM + all fixes (March 13):**
+
+| Page | Performance | Accessibility | Best Practices | SEO |
+| --- | --- | --- | --- | --- |
+| Homepage | 99 | 95 | 100 | 100 |
+| About | 100 | 100 | 100 | 100 |
+| Blog | 98 | 100 | 100 | 100 |
+| Contact | 98 | 100 | 100 | 100 |
+| Blog posts | 93-97 | 96 | 100 | 100 |
+
+Best Practices and SEO: back to perfect 100s across every page. Performance is basically the same as before GTM. Accessibility is still being fine-tuned on a few pages.
+
+Not bad for a site running full GTM with Google Analytics.
+
+## What This Cost Me
+
+12 commits. Three different approaches to loading GTM (synchronous, Partytown, delayed). Two rounds of CSP header fixes. A dark mode contrast rabbit hole that touched six files.
+
+All to add one tracking script without breaking the scores I already had.
+
+Every third-party script you add costs something. The GTM snippet Google gives you is 4 lines of code. The performance, security, and accessibility work to support it took me an entire evening.
+
+If you're building a fast site and need analytics, load your scripts after the page renders. Don't trust that the default snippet is optimized for your setup. And if you have CSP headers, test your tracking in an incognito window before you spend two hours debugging.
+
+Your Lighthouse scores aren't a trophy. They're a maintenance contract.
