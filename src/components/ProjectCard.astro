@@ -14,9 +14,9 @@ interface Props {
 const { title, description, url, github, tags = [], status } = Astro.props;
 
 const statusColor = {
-  live: 'bg-emerald-500',
-  building: 'bg-amber-500',
-  idea: 'bg-slate-400',
+  live: 'bg-[var(--color-status-live)]',
+  building: 'bg-[var(--color-status-building)]',
+  idea: 'bg-[var(--color-status-idea)]',
 }[status ?? 'idea'];
 ---
 

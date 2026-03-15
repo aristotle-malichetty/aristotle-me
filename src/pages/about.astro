@@ -168,14 +168,14 @@ const techStackGroups = [
   <section class="py-16 sm:py-20 section-alt">
     <div class="max-w-3xl mx-auto px-4 sm:px-6">
       <h2 class="font-display text-2xl font-bold mb-8">What I Do</h2>
-      <div class="grid sm:grid-cols-3 gap-4">
+      <div class="space-y-6">
         {whatIDo.map(({ icon: Icon, title, description }) => (
-          <div class="p-5 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
-            <div class="w-10 h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center mb-4">
-              <Icon class="w-5 h-5 text-[var(--color-accent)]" />
+          <div class="flex items-start gap-4">
+            <Icon class="w-5 h-5 text-[var(--color-accent)] mt-1 shrink-0" />
+            <div>
+              <h3 class="font-display font-semibold mb-1">{title}</h3>
+              <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">{description}</p>
             </div>
-            <h3 class="font-display font-semibold mb-1.5">{title}</h3>
-            <p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed">{description}</p>
           </div>
         ))}
       </div>

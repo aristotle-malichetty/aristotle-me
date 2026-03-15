@@ -2,7 +2,7 @@
 import { ArrowRight, ChevronRight } from '@lucide/astro';
 ---
 
-<section class="relative py-20 sm:py-24 lg:py-32 overflow-hidden">
+<section class="relative pt-16 pb-14 sm:pt-20 sm:pb-16 lg:pt-28 lg:pb-20 overflow-hidden">
   <!-- Subtle ambient glow -->
   <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[var(--color-accent)]/[0.04] dark:bg-[var(--color-accent)]/[0.06] blur-[100px]"></div>
@@ -22,10 +22,10 @@ import { ArrowRight, ChevronRight } from '@lucide/astro';
         Marketing analyst who codes. I find what works, build what's missing, and automate the rest.
       </p>
 
-      <div class="flex flex-wrap items-center justify-center gap-5">
+      <div class="flex flex-wrap items-center justify-center gap-5 mb-10">
         <a
           href="/projects"
-          class="group inline-flex items-center gap-2.5 px-8 py-4 rounded-lg bg-[var(--color-accent)] dark:bg-[#2563eb] text-white text-lg font-medium hover:bg-[var(--color-accent-hover)] dark:hover:bg-[#1d4ed8] transition-all duration-200"
+          class="group inline-flex items-center gap-2.5 px-8 py-4 rounded-lg bg-[var(--color-accent-solid)] text-white text-lg font-medium hover:bg-[var(--color-accent-solid-hover)] transition-all duration-200"
         >
           View Projects
           <ArrowRight class="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
@@ -38,6 +38,57 @@ import { ArrowRight, ChevronRight } from '@lucide/astro';
           <ChevronRight class="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
         </a>
       </div>
+
+      <!-- Status ticker -->
+      <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-status-live)] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-status-live)]"></span>
+        </span>
+        <span class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+          Currently building
+          <span id="hero-ticker" class="font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]">a B2B lead gen SaaS</span>
+        </span>
+      </div>
     </div>
   </div>
 </section>
+
+<style>
+  @keyframes hero-ticker-fade {
+    0%, 100% { opacity: 1; }
+    45% { opacity: 1; }
+    50% { opacity: 0; }
+    55% { opacity: 0; }
+    60% { opacity: 1; }
+  }
+</style>
+
+<script>
+  function initHeroTicker() {
+    const el = document.getElementById('hero-ticker');
+    if (!el) return;
+
+    const items = [
+      'a B2B lead gen SaaS',
+      'a newsletter platform',
+      'JobOS — land more interviews',
+      'data APIs',
+      'this website',
+    ];
+    let idx = 0;
+
+    setInterval(() => {
+      el.style.transition = 'opacity 0.4s ease';
+      el.style.opacity = '0';
+      setTimeout(() => {
+        idx = (idx + 1) % items.length;
+        el.textContent = items[idx];
+        el.style.opacity = '1';
+      }, 400);
+    }, 3000);
+  }
+
+  initHeroTicker();
+  document.addEventListener('astro:after-swap', initHeroTicker);
+</script>

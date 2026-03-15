@@ -70,14 +70,14 @@ const { slug, turnstileSiteKey } = Astro.props;
     <!-- Submit button -->
     <button
       type="submit"
-      class="comment-submit-btn px-5 py-2.5 rounded-lg bg-[var(--color-accent)] dark:bg-[#2563eb] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] dark:hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      class="comment-submit-btn px-5 py-2.5 rounded-lg bg-[var(--color-accent-solid)] text-white text-sm font-medium hover:bg-[var(--color-accent-solid-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       Post Comment
     </button>
 
     <!-- Status messages -->
-    <p class="form-error hidden mt-2 text-sm text-red-500"></p>
-    <p class="form-success hidden mt-2 text-sm text-green-600 dark:text-green-400">Your comment has been submitted and is awaiting moderation.</p>
+    <p class="form-error hidden mt-2 text-sm text-[var(--color-error)]"></p>
+    <p class="form-success hidden mt-2 text-sm text-[var(--color-success)]">Your comment has been submitted and is awaiting moderation.</p>
   </form>
 
   <!-- Comments list -->
@@ -272,9 +272,9 @@ const { slug, turnstileSiteKey } = Astro.props;
           ></textarea>
           <div class="reply-turnstile mb-2"></div>
           <div class="flex items-center gap-2">
-            <button type="button" class="reply-submit px-4 py-2 rounded-lg bg-[var(--color-accent)] dark:bg-[#2563eb] text-white text-xs font-medium hover:bg-[var(--color-accent-hover)] dark:hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reply</button>
-            <p class="reply-error hidden text-xs text-red-500"></p>
-            <p class="reply-success hidden text-xs text-green-600 dark:text-green-400">Reply submitted, awaiting moderation.</p>
+            <button type="button" class="reply-submit px-4 py-2 rounded-lg bg-[var(--color-accent-solid)] text-white text-xs font-medium hover:bg-[var(--color-accent-solid-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reply</button>
+            <p class="reply-error hidden text-xs text-[var(--color-error)]"></p>
+            <p class="reply-success hidden text-xs text-[var(--color-success)]">Reply submitted, awaiting moderation.</p>
           </div>
         </div>
       `;

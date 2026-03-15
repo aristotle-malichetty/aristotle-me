@@ -280,7 +280,7 @@ const breadcrumbLd = {
               {prevPost.data.title}
             </p>
           </a>
-        ) : <div />}
+        ) : <div aria-hidden="true" />}
         {nextPost && (
           <a
             href={`/blog/${nextPost.id}`}
@@ -305,6 +305,7 @@ const breadcrumbLd = {
     role="dialog"
     aria-modal="true"
     aria-labelledby="share-modal-title"
+    aria-describedby="share-modal-desc"
     aria-hidden="true"
     inert
   >
@@ -319,6 +320,7 @@ const breadcrumbLd = {
       <!-- Header -->
       <div class="flex items-center justify-between mb-5">
         <h2 id="share-modal-title" class="text-lg font-semibold">Share this post</h2>
+        <p id="share-modal-desc" class="sr-only">Copy a link or share via X, email, or LinkedIn.</p>
         <button id="share-close" class="p-1.5 rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-card-light)] dark:hover:bg-[var(--color-card-dark)] transition-colors" aria-label="Close">
           <XIcon class="w-5 h-5" />
         </button>
@@ -389,7 +391,7 @@ const breadcrumbLd = {
       {/* Floating button */}
       <button
         id="mobile-toc-btn"
-        class="fixed bottom-6 right-4 z-50 xl:hidden w-12 h-12 flex items-center justify-center rounded-full bg-[var(--color-accent)] dark:bg-[#2563eb] text-white shadow-lg hover:bg-[var(--color-accent-hover)] dark:hover:bg-[#1d4ed8] transition-colors"
+        class="fixed bottom-6 right-4 z-50 xl:hidden w-12 h-12 flex items-center justify-center rounded-full bg-[var(--color-accent-solid)] text-white shadow-lg hover:bg-[var(--color-accent-solid-hover)] transition-colors"
         aria-label="Table of contents"
         aria-expanded="false"
         aria-controls="mobile-toc-overlay"
@@ -620,10 +622,10 @@ const breadcrumbLd = {
         const label = copyBtn.querySelector('span:last-child');
         if (label) {
           label.textContent = 'Copied!';
-          label.classList.add('text-green-500');
+          label.style.color = 'var(--color-success)';
           setTimeout(() => {
             label.textContent = 'Copy link';
-            label.classList.remove('text-green-500');
+            label.style.color = '';
           }, 2000);
         }
       });

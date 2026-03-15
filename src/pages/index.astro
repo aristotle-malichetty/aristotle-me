@@ -149,17 +149,27 @@ const websiteLd = {
         <p class="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-accent-hover)] mb-2">What people say</p>
         <h2 class="font-display text-2xl sm:text-3xl font-bold mb-3">Trusted by 40+ clients</h2>
         <div class="flex items-center justify-center gap-1">
+          <span class="sr-only">5 out of 5 stars</span>
           {[...Array(5)].map(() => (
             <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
           ))}
           <span class="ml-1.5 text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">25+ reviews</span>
         </div>
       </div>
-      <div class="grid sm:grid-cols-2 gap-5">
-        {testimonials.map(({ quote, name, role, image }) => (
-          <div class="relative p-7 sm:p-10 rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
-            <Quote class="w-8 h-8 text-[var(--color-accent)]/20 absolute top-7 right-7 sm:top-10 sm:right-10" />
-            <p class="text-[15px] sm:text-base text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed mb-8 relative">
+      <div class="grid sm:grid-cols-5 gap-5">
+        {testimonials.map(({ quote, name, role, image }, i) => (
+          <div class:list={[
+            'relative rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]',
+            i === 0 ? 'sm:col-span-3 p-7 sm:p-10' : 'sm:col-span-2 p-7 sm:p-8',
+          ]}>
+            <Quote class:list={[
+              'absolute text-[var(--color-accent)]/15',
+              i === 0 ? 'w-10 h-10 top-7 right-7 sm:top-10 sm:right-10' : 'w-7 h-7 top-7 right-7 sm:top-8 sm:right-8',
+            ]} />
+            <p class:list={[
+              'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] leading-relaxed relative',
+              i === 0 ? 'text-base sm:text-lg mb-8' : 'text-sm sm:text-[15px] mb-6',
+            ]}>
               {quote}
             </p>
             <div class="flex items-center gap-3">
@@ -169,10 +179,16 @@ const websiteLd = {
                   alt={name}
                   width="48"
                   height="48"
-                  class="w-12 h-12 rounded-full object-cover"
+                  class:list={[
+                    'rounded-full object-cover',
+                    i === 0 ? 'w-12 h-12' : 'w-10 h-10',
+                  ]}
                 />
               ) : (
-                <div class="w-12 h-12 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center">
+                <div class:list={[
+                  'rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center',
+                  i === 0 ? 'w-12 h-12' : 'w-10 h-10',
+                ]}>
                   <span class="text-sm font-bold text-[var(--color-accent)]">{name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
                 </div>
               )}
@@ -188,16 +204,19 @@ const websiteLd = {
   </section>
 
   <!-- CTA -->
-  <section class="py-20 sm:py-24">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="max-w-xl mx-auto text-center">
+  <section class="py-20 sm:py-24 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[var(--color-accent)]/[0.03] dark:bg-[var(--color-accent)]/[0.06] blur-[80px]"></div>
+    </div>
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="max-w-2xl mx-auto text-center py-12 sm:py-16 px-6 rounded-2xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-card-elevated-light)] dark:bg-[var(--color-card-elevated-dark)]">
         <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Let's build something</h2>
-        <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8 leading-relaxed">
-          Have a project in mind — or a problem that needs solving? Let's talk.
+        <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8 leading-relaxed max-w-md mx-auto">
+          Have a project in mind or a problem that needs solving? Let's talk.
         </p>
         <a
           href="/contact"
-          class="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-lg bg-[var(--color-accent)] dark:bg-[#2563eb] text-white font-medium hover:bg-[var(--color-accent-hover)] dark:hover:bg-[#1d4ed8] transition-all duration-200"
+          class="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-lg bg-[var(--color-accent-solid)] text-white font-medium hover:bg-[var(--color-accent-solid-hover)] transition-all duration-200"
         >
           Get in Touch
           <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" />

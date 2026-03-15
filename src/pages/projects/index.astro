@@ -30,9 +30,10 @@ const allTags = [...new Set(projects.flatMap((p) => p.data.tags))].sort();
 
       <!-- Tag filters -->
       {allTags.length > 0 && (
-        <div class="flex flex-wrap gap-2 mb-10" id="tag-filters">
+        <div class="flex flex-wrap gap-2 mb-10" id="tag-filters" role="group" aria-label="Filter by tag">
           <button
             data-tag="all"
+            aria-pressed="true"
             class="tag-btn active px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent-hover)] cursor-pointer transition-all duration-200"
           >
             All
@@ -40,6 +41,7 @@ const allTags = [...new Set(projects.flatMap((p) => p.data.tags))].sort();
           {allTags.map((tag) => (
             <button
               data-tag={tag}
+              aria-pressed="false"
               class="tag-btn px-3 py-1.5 text-sm font-medium rounded-full border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] cursor-pointer hover:border-[var(--color-accent)]/40 hover:text-[var(--color-accent)] transition-all duration-200"
             >
               {tag}
@@ -85,10 +87,12 @@ const allTags = [...new Set(projects.flatMap((p) => p.data.tags))].sort();
         buttons.forEach((b) => {
           b.classList.remove('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent-hover)]');
           b.classList.add('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+          b.setAttribute('aria-pressed', 'false');
         });
 
         btn.classList.add('active', 'border-[var(--color-accent)]', 'bg-[var(--color-accent)]/10', 'text-[var(--color-accent-hover)]');
         btn.classList.remove('border-[var(--color-border-light)]', 'dark:border-[var(--color-border-dark)]', 'text-[var(--color-text-secondary-light)]', 'dark:text-[var(--color-text-secondary-dark)]');
+        btn.setAttribute('aria-pressed', 'true');
 
         projects.forEach((project) => {
           if (tag === 'all') {
