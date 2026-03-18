@@ -4,7 +4,7 @@ export const prerender = true;
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import arisHeadshot from '../assets/images/aris-headshot.png';
-import { Rocket, BarChart3, Brain, Newspaper, Cpu } from '@lucide/astro';
+import { Rocket, BarChart3, Brain, Newspaper, Cpu, ArrowRight } from '@lucide/astro';
 
 const clients = [
   { name: 'ILOLA', href: 'https://ilolas.com/' },
@@ -239,6 +239,25 @@ const techStackGroups = [
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="pt-10 pb-6 sm:pt-14 sm:pb-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <div class="text-center py-12 sm:py-16 px-6 rounded-2xl bg-[var(--color-accent)]/[0.06] dark:bg-[var(--color-accent)]/[0.10] border border-[var(--color-accent)]/[0.12] dark:border-[var(--color-accent)]/[0.18]">
+        <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Got something to build?</h2>
+        <p class="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-8 leading-relaxed max-w-md mx-auto">
+          I'm always open to interesting projects. If you think we'd work well together, reach out.
+        </p>
+        <a
+          href="/contact"
+          class="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-lg bg-[var(--color-accent-solid)] text-white font-medium hover:bg-[var(--color-accent-solid-hover)] transition-all duration-200"
+        >
+          Get in Touch
+          <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+        </a>
       </div>
     </div>
   </section>
