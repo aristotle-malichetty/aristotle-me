@@ -56,3 +56,6 @@ wrangler.jsonc
 
 # Dev screenshots (Playwright/browser testing artifacts)
 .dev-screenshots/
+
+# Screenshots in repo root
+*.png

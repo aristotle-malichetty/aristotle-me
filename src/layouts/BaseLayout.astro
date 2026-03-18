@@ -57,7 +57,7 @@ const { title, description, image, type, publishedDate, modifiedDate } = Astro.p
       })();
     </script>
   </head>
-  <body class="min-h-screen flex flex-col font-body antialiased">
+  <body class="min-h-screen flex flex-col font-body antialiased bg-[var(--color-surface-light)] dark:bg-[var(--color-surface-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-text-primary-dark)]">
     <Header />
     <main class="flex-1">
       <slot />
