@@ -20,6 +20,7 @@ aristotle.me — personal website and blog for Aristotle Malichetty. Astro 5 + K
 - **Keystatic** for content management (local storage, `.mdoc` files)
 - **Tailwind CSS 4** via Vite plugin (not PostCSS)
 - **Cloudflare D1** database for blog comments
+- **Cloudflare Zaraz** for analytics (GA4) — no client-side GTM, runs at the edge
 - **Markdoc** for content rendering (not MDX)
 - Content collections defined in `src/content.config.ts` with Zod schemas
 - Keystatic config in `keystatic.config.ts`

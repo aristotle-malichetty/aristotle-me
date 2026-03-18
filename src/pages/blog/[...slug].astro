@@ -6,7 +6,7 @@ import TagList from '@components/TagList.astro';
 import CommentSection from '@components/CommentSection.astro';
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
-import { ArrowLeft, ArrowRight, Calendar, Clock, Link, Share2, MessageCircle, X as XIcon, Mail, List } from '@lucide/astro';
+import { ArrowLeft, ArrowRight, Calendar, Clock, Link, Share2, MessageCircle, X as XIcon, Mail, List, Github, Linkedin } from '@lucide/astro';
 
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 
@@ -238,7 +238,7 @@ const breadcrumbLd = {
       <!-- Share footer -->
       <div class="mt-12 pt-8 border-t border-[var(--color-border-light)] dark:border-[var(--color-border-dark)]">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-4">
             <img
               src="/images/avatar.png"
               alt="Aristotle Malichetty"
@@ -248,18 +248,30 @@ const breadcrumbLd = {
             />
             <div>
               <p class="font-semibold text-sm">Written by <a href="/about" class="hover:text-[var(--color-accent)] transition-colors">Aristotle Malichetty</a></p>
-              <p class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              <p class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
                 Analytics and code. I build what the problem needs.
               </p>
             </div>
           </div>
-          <button
-            data-share-trigger
-            class="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-full border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
-          >
-            <Share2 class="w-4 h-4" />
-            Share
-          </button>
+          <div class="flex items-center gap-1">
+            <a href="https://x.com/aristotle_me" target="_blank" rel="noopener noreferrer" class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all" aria-label="X (Twitter)">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/aristotlem" target="_blank" rel="noopener noreferrer" class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all" aria-label="LinkedIn">
+              <Linkedin class="w-4 h-4" />
+            </a>
+            <a href="https://github.com/aristotle-malichetty" target="_blank" rel="noopener noreferrer" class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all" aria-label="GitHub">
+              <Github class="w-4 h-4" />
+            </a>
+            <div class="w-px h-4 bg-[var(--color-border-light)] dark:bg-[var(--color-border-dark)] mx-1"></div>
+            <button
+              data-share-trigger
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all"
+              aria-label="Share this post"
+            >
+              <Share2 class="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

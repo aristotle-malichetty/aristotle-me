@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { Mail, Linkedin, Twitter, Github, ArrowUpRight } from '@lucide/astro';
+import { Mail, Linkedin, Github, ArrowUpRight } from '@lucide/astro';
 
 const contacts = [
   {
@@ -21,7 +21,7 @@ const contacts = [
     description: 'Connect with me professionally. I post about analytics and building in public.',
   },
   {
-    icon: Twitter,
+    icon: null,
     label: 'X / Twitter',
     value: '@aristotle_me',
     href: 'https://x.com/aristotle_me',
@@ -67,7 +67,7 @@ const contacts = [
             >
               <div class="flex items-start justify-between mb-4">
                 <div class="w-10 h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center">
-                  <Icon class="w-5 h-5 text-[var(--color-accent)]" />
+                  {Icon ? <Icon class="w-5 h-5 text-[var(--color-accent)]" /> : <svg class="w-5 h-5 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>}
                 </div>
                 <ArrowUpRight class="w-4 h-4 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </div>
