@@ -1,13 +1,13 @@
 ---
 title: I Got Perfect 100s on Lighthouse. Then I Added Google Tag Manager.
-description: Four perfect scores on every page. Then one script tag broke everything. Here's how I fixed it without removing GTM.
+description: Four perfect scores on every page. Then one script tag broke everything. Here's how I tried three fixes and ended up ditching GTM entirely.
 date: 2026-03-13
 tags:
   - Web Development
   - SEO
   - Astro
   - Building in Public
-draft: false
+draft: true
 ---
 
 Four 100s on every page.
@@ -20,7 +20,7 @@ Then I added Google Tag Manager. One script tag in the `<head>`. The standard sn
 
 Performance dropped to 85. Best Practices dropped to 92. Two scores I'd spent hours fixing, gone in one paste.
 
-Here's how I got them back without removing GTM.
+Here's how I tried three different fixes. And why I eventually removed GTM entirely.
 
 ## The Scores Before GTM
 
@@ -157,14 +157,43 @@ Accessibility, Best Practices, and SEO: perfect 100s across every page. Performa
 
 Not bad for a site running full GTM with Google Analytics.
 
+But I wasn't done yet.
+
+## Then I Removed GTM Entirely
+
+The delayed loading worked. Scores were high. GTM fired. Analytics flowed.
+
+But something bugged me. I was still shipping 80-100KB of GTM JavaScript to every visitor. It just loaded later. The performance cost was deferred, not eliminated. And I was missing the first 1-2 seconds of every session.
+
+For a personal site running GA4 and nothing else, that felt like overkill.
+
+I'm already on Cloudflare Pages. Turns out Cloudflare has a tool called **Zaraz** that handles analytics at the edge. No client-side JavaScript. No script tags. No performance impact at all.
+
+Zaraz runs on Cloudflare's network. When someone visits your site, it processes the analytics server-side before the page even reaches the browser. GA4 gets the same data. You get zero Lighthouse penalty.
+
+The switch took about 15 minutes.
+
+1. Enabled Zaraz in the Cloudflare dashboard
+2. Added GA4 as a tool with my measurement ID
+3. Removed the GTM script from my Astro layout
+4. Cleaned up the CSP headers (no more `googletagmanager.com` or `google-analytics.com` domains needed)
+
+That's it. No npm packages. No web workers. No delayed loading hacks. The analytics just work, from the first millisecond of every visit.
+
+## Where the Scores Are Now
+
+Every page. 100/100/100/100. No asterisks. No "well, on mobile it's 98." Just perfect scores with full analytics running.
+
+The GTM detour taught me something. **The best third-party script is no third-party script.** If you can move the work to the edge, do it. Your users' browsers have enough to deal with.
+
 ## What This Cost Me
 
-12 commits. Three different approaches to loading GTM (synchronous, Partytown, delayed). Two rounds of CSP header fixes. A dark mode contrast rabbit hole that touched six files.
+14 commits. Four different approaches (synchronous GTM, Partytown, delayed loading, Zaraz). Two rounds of CSP header fixes. A dark mode contrast rabbit hole that touched six files.
 
-All to add one tracking script without breaking the scores I already had.
+All because I needed to count pageviews.
 
-Every third-party script you add costs something. The GTM snippet Google gives you is 4 lines of code. The performance, security, and accessibility work to support it took me an entire evening.
+Every third-party script you add costs something. The GTM snippet Google gives you is 4 lines of code. The performance, security, and accessibility work to support it took me an entire evening. And the final answer was to remove it.
 
-If you're building a fast site and need analytics, load your scripts after the page renders. Don't trust that the default snippet is optimized for your setup. And if you have CSP headers, test your tracking in an incognito window before you spend two hours debugging.
+If you're on Cloudflare, skip the GTM dance. Use Zaraz. If you're not on Cloudflare, at least delay your scripts until after the page renders. And if you have CSP headers, test your tracking in an incognito window before you spend two hours debugging.
 
-Your Lighthouse scores aren't a trophy. They're a maintenance contract.
+Your Lighthouse scores aren't a trophy. They're a maintenance contract. Mine just got a lot cheaper.

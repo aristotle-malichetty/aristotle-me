@@ -27,18 +27,6 @@ const { title, description, image, type, publishedDate, modifiedDate } = Astro.p
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Google Tag Manager (delayed until page load for performance) -->
-    <script is:inline>
-    window.addEventListener('load', function() {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
-      var j = document.createElement('script');
-      j.async = true;
-      j.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-MDX9SQ2P';
-      document.head.appendChild(j);
-    });
-    </script>
-    <!-- End Google Tag Manager -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -70,10 +58,6 @@ const { title, description, image, type, publishedDate, modifiedDate } = Astro.p
     </script>
   </head>
   <body class="min-h-screen flex flex-col font-body antialiased">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MDX9SQ2P"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <Header />
     <main class="flex-1">
       <slot />
