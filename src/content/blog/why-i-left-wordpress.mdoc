@@ -22,7 +22,7 @@ So I just... didn't.
 
 That's the real reason I left. Not performance. Not security. Not plugins. I didn't want to open the thing.
 
-My site hadn't been updated in months. Not because I didn't care. Because every update meant opening a drag-and-drop builder. As convenient as that sounds, it takes forever. I wanted something where I could make a change in a minute and move on.
+My site hadn't been updated in months. Not because I didn't care. I just couldn't justify the friction for a quick change.
 
 ## The Moment I Realized WordPress Was the Problem
 
@@ -32,8 +32,6 @@ One day I'm building something for a client and I stop. *Wait. I use this tool e
 
 Here's the disconnect. WordPress keeps everything locked in a database. Your posts, your pages, your settings. Claude Code works with plain files. These two worlds don't talk to each other.
 
-So every time you want to write something, you have to leave your workflow. Open a browser. Log into a dashboard. Navigate menus. Drag blocks around in a page builder.
-
 It's like being asked to write an email but first you have to drive to the post office.
 
 I don't like designing websites in page builders. It takes too much time. I like *building* websites. There's a difference.
@@ -42,19 +40,21 @@ The idea was simple: if I could write and publish directly from my terminal, I'd
 
 And I'd end up rebuilding my entire site in 5 hours to prove it. But first, here's what I needed.
 
-## What I Needed (No Compromises)
+## What I Needed From the Next Thing
 
-Before I looked at a single tool, I wrote out my requirements:
+I already knew what was killing my motivation. So the replacement had to fix those things specifically.
 
-- **Claude Code has to be the primary interface.** I use it every day. My blog should live there too.
-- **A simple editor for when I'm away from my Mac.** Not a full dashboard. Just something lightweight I can open from a browser for a quick draft.
-- **No page builders. No drag-and-drop.** I want to describe what I want and let Claude Code build it. Not click around in a visual editor for an hour.
-- **Publish from my terminal.** Write it, push it, it's live. That's it.
-- **SEO that just works.** No installing 5 plugins for basic meta tags and sitemaps. Baked in.
+First, it had to work from my terminal. I use Claude Code every day. If my blog doesn't live where I already work, I won't use it. That was the whole problem with WordPress.
 
-Two more non-negotiables: actually fast page loads (not "fast for WordPress" fast), and secure by default. No database means nothing to hack. No admin panel to brute-force. No plugins with vulnerabilities.
+Second, I still needed a way to write when I'm away from my Mac. Not a full dashboard. Just something lightweight I can open from a browser to jot down a draft.
 
-WordPress didn't check most of these boxes. That's not WordPress's fault. It's a mismatch. WordPress is built for people who want a dashboard. I want a terminal.
+Third, no page builders. I spent more time dragging blocks around in Elementor than actually writing. I want to describe what I want and let Claude Code build it.
+
+And the basics had to be baked in. SEO without 5 plugins. Fast pages without caching hacks. No database sitting there waiting to get hacked.
+
+WordPress wasn't bad. It was built for people who want a dashboard. I wanted a terminal.
+
+So I started looking. And two things kept pointing me in the same direction.
 
 ## Two Signals Pointed Me to Astro
 
@@ -64,17 +64,17 @@ In one of my Facebook groups, someone was selling a lifetime deal for **PhantomW
 
 Two different people. Two different approaches. Both pointing at the same framework.
 
-That got my attention.
+That got my attention. But I didn't jump straight to building. I tried the easy route first.
 
 ## Why I Didn't Go Headless
 
-I looked into PhantomWP seriously. Keep WordPress for content, get Astro's speed for visitors. Sounds like the best of both worlds.
+I looked into PhantomWP seriously. The pitch was "headless WordPress." You keep WordPress for writing, but use a faster tool to build what visitors actually see. Two systems instead of one.
 
-Not really.
+Sounds like the best of both worlds. Not really.
 
-It was still in beta. It added a dependency on their cloud platform. And when I really thought about it, headless WordPress is still WordPress. I'd still deal with the dashboard, the plugins, the database. Just with an extra step in between.
+PhantomWP was still in beta. It added a dependency on their cloud platform. And when I really thought about it, I'd still deal with the WordPress dashboard, the plugins, the database. Just with an extra layer on top.
 
-**Ghost CMS** came up next. I asked Claude Code to research alternatives. Ghost was the top suggestion. Beautiful writing experience, clean interface.
+**Ghost CMS** came up next. I asked Claude Code to research alternatives. Ghost was the top suggestion. Markdown editor, membership tools, built for writers.
 
 But it needs its own server. Costs $9-25/month. The content still lives in a database Claude Code can't touch. The only advantage over WordPress was the editor. And I'm in my terminal 90% of the time anyway.
 
@@ -82,7 +82,7 @@ Doesn't help me.
 
 I even tried building my own solution. I started a [WordPress plugin](https://github.com/aristotle-malichetty/wp-ai-code) to connect WP directly to Claude Code. But I had too many other projects going on. I couldn't justify the time investment on a plugin just to make a broken workflow slightly less broken.
 
-That's when I stopped trying to fix WordPress. I wanted to start clean.
+That's when I stopped trying to fix WordPress. I wanted to start clean. Here's what I picked and why.
 
 ## The Stack That Actually Worked
 
@@ -104,15 +104,15 @@ What if I'm not at my Mac? What if I want to jot down a draft from my phone?
 
 I still wanted a backup plan. Not a full CMS. Just a lightweight way to manage content from a browser.
 
-Claude Code found **Keystatic**. Never heard of it. Turns out it's beautifully simple. It works with the same plain text files Claude Code edits. Free, open source. Connect it to your code repository and it gives you a clean visual editor at a URL on your site.
+Claude Code found **Keystatic**. Never heard of it. But here's what sold me: it works with the same plain text files Claude Code edits. No database. No separate content system. Connect it to your code repository and it gives you a visual editor at a URL on your site. Free, open source.
 
 Here's the part I love: there's no conflict between the two. Keystatic and Claude Code edit the exact same files. Write a post from the visual editor or create one from the terminal. Same file, same place. No syncing, no imports, no "which version is the real one" headaches.
 
 ### Cloudflare Pages
 
-I almost went with Vercel for hosting. They're popular in the dev world. But their free plan doesn't allow commercial use. My site has consulting and SaaS projects on it. That counts.
+$0/month. Unlimited traffic. Servers worldwide. Automatic security certificates. That's Cloudflare Pages.
 
-Cloudflare Pages has no such restriction. Unlimited traffic, servers worldwide, automatic security certificates. Total cost: $0/month. I was already using Cloudflare for my domains, so connecting it took about 30 seconds.
+I almost went with Vercel, but their free plan doesn't allow commercial use. My site has consulting and SaaS projects on it. That counts. Cloudflare had no such restriction, and I was already using them for my domains. Connecting it took about 30 seconds.
 
 ## What My Day Actually Looks Like Now
 
@@ -124,9 +124,11 @@ Here's the workflow I wanted. And the one I actually got.
 
 **Changing the design:** I tell Claude Code what I want different. It edits the files. I push. Done.
 
-No dashboards. No page builders. No plugin updates breaking things at 2am. Just my terminal, some text files, and a `git push`.
+Just my terminal, some text files, and a `git push`.
 
-## The Trade-offs You Should Know About
+Sounds perfect. But it's not free. Here's what you give up.
+
+## What You Lose Without WordPress
 
 I won't pretend this works for everyone.
 
