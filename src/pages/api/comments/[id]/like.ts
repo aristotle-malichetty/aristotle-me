@@ -9,6 +9,16 @@ export async function POST(context: APIContext) {
     const env = runtime.env;
     const db = env.DB;
 
+    // Origin validation — reject cross-origin requests
+    const origin = context.request.headers.get('Origin');
+    const siteUrl = context.url.origin;
+    if (!origin || origin !== siteUrl) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const commentId = Number(context.params.id);
     if (!commentId || commentId < 1) {
       return new Response(JSON.stringify({ error: 'Invalid comment ID' }), {

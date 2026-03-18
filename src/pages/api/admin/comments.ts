@@ -67,6 +67,17 @@ async function recordFailedAuth(context: APIContext, env: any): Promise<void> {
   await db.prepare('INSERT INTO rate_limits (ip_hash, action) VALUES (?, ?)').bind(ipHash, 'admin_auth').run();
 }
 
+async function getClientIpHash(context: APIContext, env: any): Promise<string> {
+  const clientIP = context.request.headers.get('CF-Connecting-IP') || context.request.headers.get('X-Forwarded-For') || '0.0.0.0';
+  return hashIP(clientIP, env.IP_HASH_SALT || '');
+}
+
+async function logAuditEntry(db: any, action: string, commentId: number, snapshot: any, ipHash: string): Promise<void> {
+  await db.prepare(
+    'INSERT INTO admin_audit_log (action, comment_id, comment_snapshot, ip_hash) VALUES (?, ?, ?, ?)'
+  ).bind(action, commentId, JSON.stringify(snapshot), ipHash).run();
+}
+
 export async function GET(context: APIContext) {
   try {
     const { runtime } = context.locals as any;
@@ -79,6 +90,19 @@ export async function GET(context: APIContext) {
     }
 
     const db = env.DB;
+    const url = new URL(context.request.url);
+
+    // Return audit log entries when ?audit=1
+    if (url.searchParams.get('audit') === '1') {
+      const { results: auditEntries } = await db.prepare(
+        'SELECT id, action, comment_id, comment_snapshot, ip_hash, created_at FROM admin_audit_log ORDER BY created_at DESC LIMIT 100'
+      ).all();
+      return new Response(JSON.stringify({ audit: auditEntries }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { results } = await db.prepare(
       'SELECT id, post_slug, parent_id, author_name, author_email, comment_text, created_at, approved, ip_hash FROM comments ORDER BY created_at DESC'
     ).all();
@@ -117,7 +141,24 @@ export async function PATCH(context: APIContext) {
       });
     }
 
+    // Snapshot before mutation
+    const snapshot = await db.prepare(
+      'SELECT id, post_slug, parent_id, author_name, author_email, comment_text, created_at, approved FROM comments WHERE id = ?'
+    ).bind(body.id).first();
+
+    if (!snapshot) {
+      return new Response(JSON.stringify({ error: 'Comment not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     await db.prepare('UPDATE comments SET approved = ? WHERE id = ?').bind(body.approved, body.id).run();
+
+    // Audit log
+    const action = body.approved === 1 ? 'approve' : 'hide';
+    const ipHash = await getClientIpHash(context, env);
+    await logAuditEntry(db, action, body.id, snapshot, ipHash);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -153,7 +194,23 @@ export async function DELETE(context: APIContext) {
       });
     }
 
+    // Snapshot before deletion
+    const snapshot = await db.prepare(
+      'SELECT id, post_slug, parent_id, author_name, author_email, comment_text, created_at, approved FROM comments WHERE id = ?'
+    ).bind(body.id).first();
+
+    if (!snapshot) {
+      return new Response(JSON.stringify({ error: 'Comment not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     await db.prepare('DELETE FROM comments WHERE id = ?').bind(body.id).run();
+
+    // Audit log
+    const ipHash = await getClientIpHash(context, env);
+    await logAuditEntry(db, 'delete', body.id, snapshot, ipHash);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

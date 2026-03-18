@@ -57,10 +57,13 @@ import BaseLayout from '@layouts/BaseLayout.astro';
       <button class="tab-btn active-tab px-4 py-2 text-sm font-medium transition-colors" data-filter="pending">Pending</button>
       <button class="tab-btn px-4 py-2 text-sm font-medium transition-colors" data-filter="approved">Approved</button>
       <button class="tab-btn px-4 py-2 text-sm font-medium transition-colors" data-filter="all">All</button>
+      <button class="tab-btn px-4 py-2 text-sm font-medium transition-colors" data-filter="audit">Audit Log</button>
     </div>
 
     <!-- Comment Cards -->
     <div id="comment-cards" class="space-y-3"></div>
+    <!-- Audit Log Cards -->
+    <div id="audit-cards" class="hidden space-y-3"></div>
     <p id="no-comments" class="hidden text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-8 text-center">
       No comments to show.
     </p>
@@ -102,13 +105,43 @@ import BaseLayout from '@layouts/BaseLayout.astro';
     const logoutBtn = document.getElementById('logout-btn')!;
     const pendingBadge = document.getElementById('pending-badge')!;
     const commentCards = document.getElementById('comment-cards')!;
+    const auditCards = document.getElementById('audit-cards')!;
     const noComments = document.getElementById('no-comments')!;
     const loadingEl = document.getElementById('loading-comments')!;
     const tabBtns = document.querySelectorAll('.tab-btn');
 
     let token = sessionStorage.getItem('admin_token') || '';
     let comments: any[] = [];
+    let auditEntries: any[] = [];
+    let auditLoaded = false;
     let currentFilter = 'pending';
+
+    // Session timeout — 30 minutes of inactivity
+    const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+    let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function resetInactivityTimer() {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      if (!token) return;
+      sessionStorage.setItem('admin_last_activity', String(Date.now()));
+      inactivityTimer = setTimeout(() => {
+        showLogin();
+      }, SESSION_TIMEOUT_MS);
+    }
+
+    function checkSessionExpiry(): boolean {
+      const lastActivity = Number(sessionStorage.getItem('admin_last_activity') || '0');
+      if (lastActivity && Date.now() - lastActivity > SESSION_TIMEOUT_MS) {
+        showLogin();
+        return true;
+      }
+      return false;
+    }
+
+    // Track user activity to reset timeout
+    ['click', 'keydown', 'scroll'].forEach((evt) => {
+      document.addEventListener(evt, resetInactivityTimer, { passive: true });
+    });
 
     function escapeHtml(str: string): string {
       return str
@@ -168,11 +201,14 @@ import BaseLayout from '@layouts/BaseLayout.astro';
       dashboard.classList.remove('hidden');
       updateBadge();
       renderComments();
+      resetInactivityTimer();
     }
 
     function showLogin() {
       token = '';
       sessionStorage.removeItem('admin_token');
+      sessionStorage.removeItem('admin_last_activity');
+      if (inactivityTimer) clearTimeout(inactivityTimer);
       dashboard.classList.add('hidden');
       loginScreen.classList.remove('hidden');
       passwordInput.value = '';
@@ -196,11 +232,19 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 
     // Tabs
     tabBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         tabBtns.forEach((b) => b.classList.remove('active-tab'));
         btn.classList.add('active-tab');
         currentFilter = (btn as HTMLElement).dataset.filter || 'pending';
-        renderComments();
+        if (currentFilter === 'audit') {
+          commentCards.classList.add('hidden');
+          auditCards.classList.remove('hidden');
+          await fetchAndRenderAudit();
+        } else {
+          auditCards.classList.add('hidden');
+          commentCards.classList.remove('hidden');
+          renderComments();
+        }
       });
     });
 
@@ -274,6 +318,74 @@ import BaseLayout from '@layouts/BaseLayout.astro';
       `;
     }
 
+    // Audit log
+    async function fetchAndRenderAudit() {
+      if (!auditLoaded) {
+        auditCards.innerHTML = '<p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-8 text-center">Loading audit log...</p>';
+        try {
+          const res = await fetch('/api/admin/comments?audit=1', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.status === 401) { showLogin(); return; }
+          const data = await res.json();
+          auditEntries = data.audit || [];
+          auditLoaded = true;
+        } catch {
+          auditCards.innerHTML = '<p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-8 text-center">Failed to load audit log.</p>';
+          return;
+        }
+      }
+      renderAudit();
+    }
+
+    function renderAudit() {
+      noComments.classList.add('hidden');
+      if (!auditEntries.length) {
+        auditCards.innerHTML = '<p class="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] py-8 text-center">No audit entries yet.</p>';
+        return;
+      }
+      auditCards.innerHTML = auditEntries.map((entry) => renderAuditCard(entry)).join('');
+    }
+
+    function renderAuditCard(entry: any): string {
+      let snapshot: any = {};
+      try { snapshot = JSON.parse(entry.comment_snapshot || '{}'); } catch {}
+
+      const safeName = escapeHtml(snapshot.author_name || 'Unknown');
+      const safeText = escapeHtml(snapshot.comment_text || '');
+      const safeSlug = escapeHtml(snapshot.post_slug || '');
+
+      const actionPills: Record<string, string> = {
+        approve: '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Approved</span>',
+        hide: '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Hidden</span>',
+        delete: '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Deleted</span>',
+      };
+      const pill = actionPills[entry.action] || escapeHtml(entry.action);
+      const ipShort = entry.ip_hash ? escapeHtml(entry.ip_hash.slice(0, 12)) + '...' : '';
+
+      return `
+        <div class="bg-[var(--color-card-light)] dark:bg-[var(--color-card-dark)] rounded-xl border border-[var(--color-border-light)] dark:border-[var(--color-border-dark)] p-4">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              ${pill}
+              <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">comment #${entry.comment_id}</span>
+              ${ipShort ? `<span class="text-xs font-mono text-[var(--color-text-secondary-light)]/60 dark:text-[var(--color-text-secondary-dark)]/60">${ipShort}</span>` : ''}
+            </div>
+            <span class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] whitespace-nowrap">${timeAgo(entry.created_at)}</span>
+          </div>
+          ${safeSlug ? `<a href="/blog/${safeSlug}" class="text-xs text-[var(--color-accent)] hover:underline mb-2 inline-block">/blog/${safeSlug}</a>` : ''}
+          <div class="bg-[var(--color-surface-light)] dark:bg-[var(--color-surface-dark)] rounded-lg p-3 mt-1">
+            <p class="text-xs font-semibold mb-1">${safeName}</p>
+            <p class="text-sm leading-relaxed break-words">${safeText}</p>
+          </div>
+          <details class="mt-2">
+            <summary class="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] cursor-pointer hover:text-[var(--color-accent)] transition-colors">Snapshot</summary>
+            <pre class="mt-1 text-xs font-mono bg-[var(--color-surface-light)] dark:bg-[var(--color-surface-dark)] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all">${escapeHtml(JSON.stringify(snapshot, null, 2))}</pre>
+          </details>
+        </div>
+      `;
+    }
+
     // Actions (event delegation)
     commentCards.addEventListener('click', async (e) => {
       const btn = (e.target as HTMLElement).closest('.action-btn') as HTMLElement | null;
@@ -334,6 +446,7 @@ import BaseLayout from '@layouts/BaseLayout.astro';
     // Auto-login with stored token
     async function checkStoredToken() {
       if (!token) return;
+      if (checkSessionExpiry()) return;
 
       loadingEl.classList.remove('hidden');
       loginScreen.classList.add('hidden');

@@ -16,6 +16,16 @@ export async function POST(context: APIContext) {
       });
     }
 
+    // Origin validation — reject cross-origin requests
+    const origin = context.request.headers.get('Origin');
+    const siteUrl = context.url.origin;
+    if (!origin || origin !== siteUrl) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await context.request.json();
 
     // Honeypot check — if the hidden "website" field is filled, silently discard
@@ -95,17 +105,34 @@ export async function POST(context: APIContext) {
       });
     }
 
-    // If parent_id is set, verify it exists and belongs to the same post
+    // If parent_id is set, verify it exists and enforce max nesting depth of 3
     if (data.parent_id) {
       const parent = await db.prepare(
-        'SELECT id FROM comments WHERE id = ? AND post_slug = ? AND approved = 1'
-      ).bind(data.parent_id, data.post_slug).first();
+        'SELECT id, parent_id FROM comments WHERE id = ? AND post_slug = ? AND approved = 1'
+      ).bind(data.parent_id, data.post_slug).first<{ id: number; parent_id: number | null }>();
 
       if (!parent) {
         return new Response(JSON.stringify({ error: 'Parent comment not found' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         });
+      }
+
+      // Walk up the chain to check depth (max 3 levels: top -> reply -> reply)
+      let depth = 1;
+      let currentParentId = parent.parent_id;
+      while (currentParentId) {
+        depth++;
+        if (depth >= 3) {
+          return new Response(JSON.stringify({ error: 'Maximum reply depth reached' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        const ancestor = await db.prepare(
+          'SELECT parent_id FROM comments WHERE id = ?'
+        ).bind(currentParentId).first<{ parent_id: number | null }>();
+        currentParentId = ancestor?.parent_id || null;
       }
     }
 

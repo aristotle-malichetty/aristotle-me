@@ -44,7 +44,7 @@ export function validateCommentInput(input: unknown): { valid: true; data: Comme
   }
 
   if (author_email !== undefined && author_email !== null && author_email !== '') {
-    if (typeof author_email !== 'string' || author_email.length > 254 || !author_email.includes('@')) {
+    if (typeof author_email !== 'string' || author_email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(author_email)) {
       return { valid: false, error: 'Invalid email address' };
     }
   }
