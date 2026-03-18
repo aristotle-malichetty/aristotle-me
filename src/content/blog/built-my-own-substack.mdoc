@@ -21,19 +21,19 @@ That decision almost cost me my entire site on day one.
 
 Here's every feature I had to replace, every mistake I made, and the security hole that could have given a stranger full access to my GitHub.
 
-## What I Was Actually Replacing
+## What I Was Giving Up
 
-Before writing code, I listed what Substack actually gives you.
+Before writing code, I made a list. Everything I'd lose the moment I left Substack.
 
-Blog with reading time and share buttons. Comment threads. SEO meta tags and structured data. Social share images. Image optimization. A clean reading experience.
+Reading time. Share buttons. Comment threads. Social preview cards. Image optimization. SEO tags. A reading experience that just works out of the box.
 
-That's a lot of free infrastructure. You can see why most writers just use it.
+That list was longer than I expected. And every item on it was something I'd have to build myself.
 
 I wrote about [why I left WordPress](/blog/why-i-left-wordpress) in a separate post. Short version: I use Claude Code every day but never touched my WordPress dashboard. So I needed a stack I could manage from my terminal.
 
-I didn't just open my editor and start typing. I started in Claude's conversation UI (not Claude Code) and talked through everything first. What pages I need. What the content schemas should look like. Design direction. Deployment config.
+I didn't just open my editor and start typing. I started in Claude's conversation UI (not Claude Code) and talked through everything first. What pages I need. How the content should be structured. How it should look. Where it'd be hosted.
 
-By the end of that conversation, I had a full product spec.
+By the end of that conversation, I had a full product spec. Basically a blueprint. Every page, every feature, every tool I'd use. All written down before touching any code.
 
 Then I took that spec into Claude Code, ran it in plan mode, and let it scaffold the entire project. Astro setup, Keystatic config, pages, components, SEO, Cloudflare deployment. All from one spec.
 
@@ -43,23 +43,21 @@ The basic scaffold came together fast. Getting everything production-ready took 
 
 ## Git Init First. Always.
 
-If you're building with AI tools, this habit will save you.
+I learned this the hard way on a B2B lead gen tool I was building. Had a working solution. Let Claude Code rewrite it. The new version broke things. And because I never committed the working version, it was gone. No way to get it back.
 
-Initialize a git repo the moment the project exists. Commit after every meaningful change. Not at the end. Not when it's "ready." From the very first scaffold.
+After that, I committed after every feature, every fix, every refactor. Not to push anywhere. Just to save my progress.
 
-Two reasons.
+There's a second reason too. Claude Code reads your git history. When it can see what you've already built, what changed, what the commit messages say, it makes better decisions about what to do next. Your commit history becomes a conversation log between you and your project.
 
-**Context.** Claude Code reads your git history. When it sees what you've already built, what files changed, what the commit messages say, it makes better decisions about what to do next. Your commit history is basically a conversation log between you and your project.
+Commits cost nothing. Skipping them cost me a working feature I never got back.
 
-**Rollback.** Claude Code makes a change that breaks something? You're one `git checkout` away from the last working state. No panic. No guessing. Just revert and try again.
-
-I committed locally after every feature, every fix, every refactor. Not to push anywhere. Just to save my progress. It costs nothing and it's saved me more than once.
+With version control sorted, the first real feature to tackle was the one readers see most.
 
 ## Cloning Substack's Blog Layout
 
 If you're going to replace Substack, the reading experience has to be at least as good.
 
-So I studied how Substack does it. Reading time at the top, comment count, share buttons. I took that structure and ran with it. Time to read, share icons (almost straight from Substack), and a table of contents on the side that scrolls with you and collapses when you click it.
+So I studied how Substack does it. Reading time at the top, comment count, share buttons. I took that structure and built on it. Same layout, plus a table of contents on the side that scrolls with you and collapses when you click it.
 
 **My site:**
 
@@ -77,13 +75,15 @@ Desktop table of contents works great. Sticky sidebar, collapse toggle, highligh
 
 I added a floating button in the bottom-right corner. Tap it, a bottom sheet slides up with every section listed. Tap one, smooth scroll, sheet closes. Small addition. Big difference in usability.
 
+The layout was done. But a blog without comments is just a monologue.
+
 ## Building My Own Comment System
 
 Substack gives you threaded comments for free. I had to build mine.
 
 I looked at open source options. Giscus requires a GitHub account to comment. Most of my readers aren't developers. Cusdis looked promising but their own site wouldn't even load. Not a great sign for a dependency.
 
-So I built my own. Cloudflare D1 for storage, Turnstile for spam protection, honeypot fields, rate limiting, and threaded replies. Full control.
+So I built my own. Cloudflare D1 for storage, Turnstile for spam protection, honeypot fields, rate limiting, and threaded replies. Every piece mine to break and fix.
 
 ### The Reply UX I Got Wrong
 
@@ -105,11 +105,13 @@ Remember the security hole I mentioned? Here's the full story.
 
 The comment form takes a name and a message. I was putting that text directly into the page without cleaning it first. So if someone types code instead of their name, the browser treats it as part of the website and runs it.
 
-The real risk was me. I use GitHub OAuth to manage this site. If I'm logged in and view a malicious comment, that script runs with my auth tokens. Someone could grab my GitHub token, push code to my repo, and since Cloudflare auto-deploys from GitHub, they'd own my entire site. Through my own comment section.
+The real risk was future me. Keystatic, my CMS, supports GitHub OAuth for browser-based editing. I run it locally for now. But if I ever switch to the hosted version and log in while viewing a malicious comment, that script runs with my auth tokens. Someone grabs my GitHub token, pushes code to my repo, and Cloudflare auto-deploys it. They'd own my entire site. Through my own comment section.
 
 The fix took two minutes. But finding it took longer.
 
 On Substack, someone else worries about this. When you own the stack, you catch these yourself. AI tools write code fast. They don't always write it safe.
+
+The comments worked. The security was patched. But the site still looked rough.
 
 ## The Design Was Ugly (Until Playwright MCP Fixed It)
 
@@ -119,9 +121,11 @@ I installed [Playwright MCP](https://github.com/microsoft/playwright-mcp) into m
 
 I told it to go through the whole site and tell me what could be improved.
 
-The initial design was plain. Functional but bland. Claude Code came back with suggestions. Warmer color palette, better card elevations, the white-and-cement color pattern you see now. The site looked significantly better after that one pass.
+The first version looked like a default template with my name on it. White background, flat cards, no visual personality. The kind of site where you can't tell if it's a portfolio or a homework assignment.
 
-I also pulled two recommendations from LinkedIn and added them as testimonials. The original reviews were long. Nobody reads a full paragraph from a stranger. So I trimmed them to the strongest two sentences each.
+Claude Code came back with specific fixes. Swap the pure white for a warm off-white. Add subtle depth to the cards. Use a cement-gray tone as the secondary color instead of plain gray. Small changes, but the site went from "template" to "someone actually designed this."
+
+Not everything I built made it to the final version though.
 
 ## Things I Built and Then Deleted
 
@@ -161,7 +165,7 @@ Astro has a built-in image component that handles compression, format conversion
 
 I told Claude Code to fix this. It restructured how images flow through the build pipeline. Here's what happened to the file sizes:
 
-| Image | Before | After (480w) | After (1024w) | Reduction |
+| Image | Before | Mobile | Desktop | Reduction |
 |---|---|---|---|---|
 | blog-layout-substack.png | 1,468kB | 18kB | 124kB | 99% |
 | blog-layout-aristotle.png | 872kB | 19kB | 94kB | 98% |
@@ -171,13 +175,11 @@ I told Claude Code to fix this. It restructured how images flow through the buil
 
 3.1MB down to 68kB on mobile. That 1.4MB Substack screenshot? 18kB.
 
-The initial build is never done. The best improvements come from actually using your site and noticing what's slow.
+## My Links Looked Naked on Twitter
 
-## SEO for Google and AI Search
+After fixing images, I shared a post on Twitter. Plain text link. No preview card. No image. Just a URL sitting there.
 
-After fixing images, I compared my site to what Substack and WordPress give you out of the box. I was missing a lot. Not just traditional SEO. AI search too. ChatGPT, Perplexity, Claude. These tools are answering questions now, and they need to know your site exists.
-
-The biggest gap on the traditional side: no social share images. Every time someone shared a post on Twitter or LinkedIn, it showed up as a plain text link. No preview card. No image. Just a URL.
+I compared my site to what Substack and WordPress give you out of the box. I was missing a lot. Not just share cards. AI search too. ChatGPT, Perplexity, Claude. These tools are answering questions now, and they need to know your site exists.
 
 Substack generates all of this automatically. On a custom stack, you build it yourself.
 
@@ -197,15 +199,15 @@ So I iterated. Swapped in my pixel art avatar. Added the post description. Unifi
 
 ![Final version. Gradient background, pixel art avatar, post description, content anchored to the bottom.](../../assets/images/blog/og-image-after.png)
 
-The difference between "auto-generated" and "intentional" is usually just a few design decisions.
+A few design decisions is all it takes to go from "auto-generated" to "intentional."
 
-### Structured Data, Meta Tags, and llms.txt
+### Teaching AI Search Engines I Exist
 
 Beyond OG images, I added proper Twitter tags, structured data for Google's Knowledge Panels and breadcrumbs, and fixed the RSS feed. The share modal now shows the actual OG image instead of a placeholder.
 
 Then I added an `llms.txt` file. It's a growing standard that tells AI models what your site is about and how it's structured. Think of it like `robots.txt` but for ChatGPT, Perplexity, and Claude instead of Google's crawler.
 
-None of this changes how the site looks. But it's the difference between a bare URL and a branded card when someone shares your post. And the difference between AI search knowing your site exists or not.
+None of this changes how the site looks. But share a post without it, and you get a bare URL. Share it with it, and you get a branded card. Same goes for AI search. Without `llms.txt` and structured data, your site is invisible to those tools.
 
 ## Perfect 100s on Lighthouse
 
@@ -217,16 +219,14 @@ I told Claude Code to fix everything Lighthouse flagged. One pass. After redeplo
 
 Substack doesn't make you think about Lighthouse scores. But when you share your site in a job application or a client pitch, those numbers say something. They say you care about the details, not just the features.
 
-## The Numbers
+## Would I Do It Again?
 
-About 2 days of actual build time, spread across 5 calendar days between other projects. Sub-500ms page loads on a global CDN. $0/month hosting. Perfect 100s on every Lighthouse category. Zero plugins beyond core Astro integrations.
+Substack would have been easier. No XSS scares, no Turnstile headaches, no fixing image sizes at 1 AM. I could've been writing posts instead of debugging spam filters.
 
-The site is open source: [github.com/aristotlem/aristotle-me](https://github.com/aristotlem/aristotle-me)
+But here's what I have now. A site I can change from my terminal. A comment system I built and secured myself. A blog that loads faster than most landing pages. And a codebase I actually understand, because I watched every line get written.
 
----
+I'm already planning what's next. Email subscriptions, search, maybe a newsletter. All stuff Substack gives you on day one. All stuff I'll build when I need it.
 
-Substack would have been easier. Sign up, write, publish. No deployment config, no CSS bugs at midnight.
-
-But I own every line of this. The layout, the comments, the SEO, the share cards. No platform can change the rules on me. No pricing update can lock me out.
+The whole thing is open source if you want to see how it works: [github.com/aristotlem/aristotle-me](https://github.com/aristotlem/aristotle-me)
 
 More work. More yours.
